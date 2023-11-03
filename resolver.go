@@ -50,6 +50,29 @@ func (r *Resolver) makeGroups(tiles []string) map[string][]string {
 	return groups
 }
 
+func (r *Resolver) aggregateTiles(tiles []string) []string {
+
+	grouped := make([]string, 0)
+	tileMap := make(map[string]int)
+
+	for _, t := range tiles {
+		m, ok := tileMap[t]
+		if !ok {
+			m = 0
+		}
+
+		m++
+
+		tileMap[t] = m
+	}
+
+	for t, _ := range tileMap {
+		grouped = append(grouped, t)
+	}
+
+	return grouped
+}
+
 func (r *Resolver) count(tiles []string, tile string) int {
 
 	count := 0
@@ -86,7 +109,7 @@ func (r *Resolver) genTiles(suit string, numbers []int) []string {
 	return tiles
 }
 
-func (r *Resolver) figureEyesOfGroupWithCandidates(tiles []string, candidates []string, rules *ResolverRules) string {
+func (r *Resolver) figureEyesWithCandidates(tiles []string, candidates []string, rules *ResolverRules) string {
 
 	for _, c := range candidates {
 
@@ -108,18 +131,18 @@ func (r *Resolver) figureEyesOfGroupWithCandidates(tiles []string, candidates []
 	return ""
 }
 
-func (r *Resolver) figureEyesOfGroup(tiles []string, rules *ResolverRules) string {
+func (r *Resolver) figureEyesCandidatesOfGroup(tiles []string, rules *ResolverRules) []string {
 
 	if len(tiles) == 0 {
-		return ""
+		return []string{}
 	}
 
 	if len(tiles)%3 != 2 {
-		return ""
+		return []string{}
 	}
 
 	if !rules.Straight {
-		return r.figureEyesOfGroupWithCandidates(tiles, tiles, rules)
+		return r.aggregateTiles(tiles)
 	}
 
 	suit := tiles[0][0:1]
@@ -161,7 +184,7 @@ func (r *Resolver) figureEyesOfGroup(tiles []string, rules *ResolverRules) strin
 
 	candidates := parts[found]
 
-	return r.figureEyesOfGroupWithCandidates(tiles, candidates, rules)
+	return candidates
 }
 
 func (r *Resolver) isTiplet(tiles []string) bool {

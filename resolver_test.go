@@ -105,11 +105,14 @@ func Test_Resolver_FigureEyesOfGroup(t *testing.T) {
 
 	r := NewResolver()
 
+	rules := &ResolverRules{
+		Triplet:  true,
+		Straight: true,
+	}
+
 	for answer, tiles := range tileSets {
-		tile := r.figureEyesOfGroup(tiles, &ResolverRules{
-			Triplet:  true,
-			Straight: true,
-		})
+		candidates := r.figureEyesCandidatesOfGroup(tiles, rules)
+		tile := r.figureEyesWithCandidates(tiles, candidates, rules)
 		assert.Equal(t, answer, tile, tiles)
 	}
 
@@ -123,11 +126,14 @@ func Test_Resolver_FigureEyesOfGroup_HonorTiles(t *testing.T) {
 
 	r := NewResolver()
 
+	rules := &ResolverRules{
+		Triplet:  true,
+		Straight: false,
+	}
+
 	for answer, tiles := range tileSets {
-		tile := r.figureEyesOfGroup(tiles, &ResolverRules{
-			Triplet:  true,
-			Straight: false,
-		})
+		candidates := r.figureEyesCandidatesOfGroup(tiles, rules)
+		tile := r.figureEyesWithCandidates(tiles, candidates, rules)
 		assert.Equal(t, answer, tile, tiles)
 	}
 
