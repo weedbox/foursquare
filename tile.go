@@ -6,18 +6,20 @@ import (
 	"time"
 )
 
+type TileSuit string
+
 const (
-	TileSuitWan    = "W"
-	TileSuitTong   = "T"
-	TileSuitBamboo = "B"
-	TileSuitWind   = "I"
-	TileSuitDragon = "D"
-	TileSuitFlower = "F"
-	TileSuitSeason = "S"
+	TileSuitWan    TileSuit = "W"
+	TileSuitTong            = "T"
+	TileSuitBamboo          = "B"
+	TileSuitWind            = "I"
+	TileSuitDragon          = "D"
+	TileSuitFlower          = "F"
+	TileSuitSeason          = "S"
 )
 
 type TileDef struct {
-	Suit    string
+	Suit    TileSuit
 	Numbers int
 	Count   int
 }
@@ -42,7 +44,7 @@ var StandardSetOfTiles = &TilesOptions{
 	Season: TileDef{TileSuitSeason, 4, 1},
 }
 
-func GenTiles(suit string, numbers int, count int) []string {
+func GenTiles(suit TileSuit, numbers int, count int) []string {
 
 	tiles := make([]string, numbers*count)
 

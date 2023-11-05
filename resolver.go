@@ -12,32 +12,48 @@ type ResolverRules struct {
 }
 
 type ResolvedState struct {
-	IsWin       bool     `json:"is_win"`
-	IsReadyHand bool     `json:"is_ready_hand"`
-	Eyes        []string `json:"eyes"`
+	IsWin               bool     `json:"is_win"`
+	IsReadyHand         bool     `json:"is_ready_hand"`
+	ReadyHandCandidates []string `json:"ready_hand_candidates"`
+	Eyes                []string `json:"eyes"`
 }
+
+var (
+	SuitedTileRule = &ResolverRules{
+		Triplet:  true,
+		Straight: true,
+	}
+	HonorTileRule = &ResolverRules{
+		Triplet:  true,
+		Straight: false,
+	}
+)
 
 func NewResolvedState() *ResolvedState {
 	return &ResolvedState{
-		IsWin:       false,
-		IsReadyHand: false,
-		Eyes:        make([]string, 0),
+		IsWin:               false,
+		IsReadyHand:         false,
+		ReadyHandCandidates: make([]string, 0),
+		Eyes:                make([]string, 0),
 	}
 }
 
 type Resolver struct {
+	tilesOpts *TilesOptions
 }
 
-func NewResolver() *Resolver {
-	return &Resolver{}
+func NewResolver(tilesOpts *TilesOptions) *Resolver {
+	return &Resolver{
+		tilesOpts: tilesOpts,
+	}
 }
 
-func (r *Resolver) makeGroups(tiles []string) map[string][]string {
+func (r *Resolver) makeSuitGroups(tiles []string) map[TileSuit][]string {
 
-	groups := make(map[string][]string)
+	groups := make(map[TileSuit][]string)
 
 	for _, t := range tiles {
-		suit := t[0:1]
+		suit := TileSuit(t[0:1])
 		g, ok := groups[suit]
 		if !ok {
 			g = make([]string, 0)
@@ -109,7 +125,7 @@ func (r *Resolver) genTiles(suit string, numbers []int) []string {
 	return tiles
 }
 
-func (r *Resolver) figureEyesWithCandidates(tiles []string, candidates []string, rules *ResolverRules) string {
+func (r *Resolver) figureEyesWithCandidates(tiles []string, candidates []string, rules *ResolverRules) (string, []string) {
 
 	for _, c := range candidates {
 
@@ -120,18 +136,19 @@ func (r *Resolver) figureEyesWithCandidates(tiles []string, candidates []string,
 			t, _ := r.filterTiles(tiles, assume)
 
 			// the remaining cards are insufficient for a winning hand
-			if !r.resolveGroup(t, rules) {
+			if !r.checkTiles(t, false, rules) {
 				continue
 			}
 
-			return c
+			// Found
+			return c, t
 		}
 	}
 
-	return ""
+	return "", tiles
 }
 
-func (r *Resolver) figureEyesCandidatesOfGroup(tiles []string, rules *ResolverRules) []string {
+func (r *Resolver) figureEyesCandidates(tiles []string, rules *ResolverRules) []string {
 
 	if len(tiles) == 0 {
 		return []string{}
@@ -145,6 +162,7 @@ func (r *Resolver) figureEyesCandidatesOfGroup(tiles []string, rules *ResolverRu
 		return r.aggregateTiles(tiles)
 	}
 
+	// Using first tile to figure out suit
 	suit := tiles[0][0:1]
 
 	parts := [][]string{
@@ -234,15 +252,40 @@ func (r *Resolver) filterTiles(tiles []string, targets []string) ([]string, int)
 	return newTiles, removed
 }
 
-func (r *Resolver) resolveGroup(tiles []string, rules *ResolverRules) bool {
+func (r *Resolver) filterEyes(tiles []string, rules *ResolverRules) ([]string, string) {
+
+	// Attempt to find eyes
+	candidates := r.figureEyesCandidates(tiles, rules)
+	eyes, t := r.figureEyesWithCandidates(tiles, candidates, rules)
+
+	return t, eyes
+
+}
+
+func (r *Resolver) checkTiles(tiles []string, hasEyes bool, rules *ResolverRules) bool {
+
+	if len(tiles) == 0 {
+		return true
+	}
+
+	t := tiles
+
+	if hasEyes {
+
+		if len(t)%3 == 0 {
+			return false
+		}
+
+		t, _ = r.filterEyes(tiles, rules)
+	}
 
 	// Not win
-	if len(tiles)%3 != 0 {
+	if len(t)%3 != 0 {
 		return false
 	}
 
 	var leftTiles []string
-	leftTiles = append(leftTiles, tiles...)
+	leftTiles = append(leftTiles, t...)
 
 	sort.Strings(leftTiles)
 
@@ -278,40 +321,136 @@ func (r *Resolver) resolveGroup(tiles []string, rules *ResolverRules) bool {
 	return true
 }
 
-func (r *Resolver) Resolve(tiles []string) *ResolvedState {
+func (r *Resolver) figureReadyHandConditions(suit TileSuit, tiles []string, rules *ResolverRules) (bool, []string) {
+
+	var candidates []string
+
+	mod := len(tiles) % 3
+	if mod == 0 {
+		return false, []string{}
+	}
+
+	hasEyes := false
+	if mod == 1 {
+		hasEyes = true
+	}
+
+	var num int
+
+	switch suit {
+	case TileSuitWan:
+		num = r.tilesOpts.Wan.Numbers
+	case TileSuitTong:
+		num = r.tilesOpts.Tong.Numbers
+	case TileSuitBamboo:
+		num = r.tilesOpts.Bamboo.Numbers
+	case TileSuitWind:
+		num = r.tilesOpts.Wind.Numbers
+	case TileSuitDragon:
+		num = r.tilesOpts.Dragon.Numbers
+	}
+
+	tries := GenTiles(suit, num, 1)
+
+	for _, t := range tries {
+
+		// Add tile then check it
+		ts := append(tiles, t)
+
+		if r.checkTiles(ts, hasEyes, rules) {
+			candidates = append(candidates, t)
+		}
+	}
+
+	if len(candidates) == 0 {
+		return false, candidates
+	}
+
+	return true, candidates
+}
+
+func (r *Resolver) resolveSuitTiles(suit TileSuit, tiles []string, hasEyes bool) *ResolvedState {
+
+	// Determine rules for suit
+	var rules *ResolverRules
+
+	switch suit {
+	case TileSuitWan, TileSuitTong, TileSuitBamboo:
+		rules = SuitedTileRule
+	case TileSuitWind, TileSuitDragon:
+		rules = HonorTileRule
+	}
 
 	state := NewResolvedState()
 
-	groups := r.makeGroups(tiles)
+	if hasEyes {
 
-	for s, g := range groups {
+		// Attempt to find eyes
+		candidates := r.figureEyesCandidates(tiles, rules)
+		eyes, _ := r.figureEyesWithCandidates(tiles, candidates, rules)
+		state.Eyes = append(state.Eyes, eyes)
+	}
 
-		switch s {
-		case TileSuitWan:
-			fallthrough
-		case TileSuitTong:
-			fallthrough
-		case TileSuitBamboo:
-			isWin := r.resolveGroup(g, &ResolverRules{
-				Triplet:  true,
-				Straight: true,
-			})
+	// Check if the combination of tiles meets the conditions for winning
+	if !r.checkTiles(tiles, hasEyes, rules) {
 
-			if !isWin {
-				state.IsWin = false
-			}
-		case TileSuitWind:
-			fallthrough
-		case TileSuitDragon:
-			isWin := r.resolveGroup(g, &ResolverRules{
-				Triplet:  true,
-				Straight: false,
-			})
+		state.IsWin = false
 
-			if !isWin {
-				state.IsWin = false
-			}
+		if hasEyes {
+			// Check if tiles meets the conditions for ready hand
+			isReadyHand, candidates := r.figureReadyHandConditions(suit, tiles, rules)
+			state.IsReadyHand = isReadyHand
+			state.ReadyHandCandidates = candidates
 		}
+	} else {
+		state.IsWin = true
+	}
+
+	return state
+}
+
+func (r *Resolver) Resolve(tiles []string) *ResolvedState {
+
+	groups := r.makeSuitGroups(tiles)
+
+	var states []*ResolvedState
+	for suit, g := range groups {
+
+		// This group has no eyes
+		if len(g)%3 == 0 {
+			s := r.resolveSuitTiles(suit, g, false)
+			states = append(states, s)
+			continue
+		}
+
+		// Find and remove eyes before resolve tiles
+		s := r.resolveSuitTiles(suit, g, true)
+		states = append(states, s)
+	}
+
+	state := NewResolvedState()
+	state.IsWin = true
+
+	for _, s := range states {
+
+		if !s.IsWin {
+			state.IsWin = false
+		}
+
+		if s.IsReadyHand {
+			state.IsReadyHand = true
+			state.ReadyHandCandidates = append(state.ReadyHandCandidates, s.ReadyHandCandidates...)
+		}
+
+		state.Eyes = append(state.Eyes, s.Eyes...)
+	}
+
+	// Shouldn't contains two set of eyes for winning, it is ready hand condition
+	if state.IsWin && len(state.Eyes) > 1 {
+		state.IsWin = false
+		state.IsReadyHand = true
+		state.ReadyHandCandidates = state.Eyes
+		state.Eyes = []string{}
 	}
 
 	return state
