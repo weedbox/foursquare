@@ -324,6 +324,13 @@ func (pr *PointRule) ConcealedKong(hand *Hand) {
 	// 實現判斷暗槓的邏輯
 }
 
-func (pr *PointRule) ConcealedHand(hand *Hand) {
+func (pr *PointRule) ConcealedHand(hand *Hand) bool {
+
 	// 實現判斷門前清的邏輯
+
+	if len(hand.Triplet) > 0 || len(hand.Straight) > 0 || len(hand.Kong.Concealed) > 0 || len(hand.Kong.Open) > 0 {
+		return false
+	}
+
+	return true
 }
