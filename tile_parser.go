@@ -294,12 +294,98 @@ func CheckWinningTiles(tiles []string, hasEyes bool, rules *ResolverRules) bool 
 	return true
 }
 
-/*
-func MakeTileSegmentations(tiles []string) [][]string {
+func ParseTileSegmentations(tiles []string, hasEyes bool, rules *ResolverRules) ([][]string, bool) {
 
-	// Check if tiles contain eyes
-	if len(tiles)%3 != 0 {
-		return false
+	if len(tiles) == 0 {
+		return [][]string{}, true
 	}
+
+	segments := make([][]string, 0)
+
+	t := tiles
+
+	if hasEyes {
+
+		if len(t)%3 == 0 {
+			return [][]string{tiles}, false
+		}
+
+		// Figure eyes
+		left, eye := RemoveEyes(tiles, rules)
+		segments = append(segments, []string{eye, eye})
+		t = left
+	}
+
+	// Not win
+	if len(t)%3 != 0 {
+		return append(segments, t), false
+	}
+
+	var leftTiles []string
+	leftTiles = append(leftTiles, t...)
+
+	sort.Strings(leftTiles)
+
+	for len(leftTiles) > 0 {
+
+		// Is triplet
+		if rules.Triplet {
+			if CountSpecificTile(leftTiles, leftTiles[0]) >= 3 {
+
+				// Take triplet
+				segments = append(segments, leftTiles[1:3])
+
+				// Attempt to remove triplet
+				leftTiles = leftTiles[3:len(leftTiles)]
+
+				continue
+			} else if !rules.Straight {
+				// Triplet only
+				return append(segments, leftTiles), false
+			}
+		}
+
+		if rules.Straight {
+
+			// Attempt to remove staight
+			straight := MakeStraight(leftTiles[0])
+			newTiles, n := RemoveTiles(leftTiles, straight)
+
+			// Not win
+			if n != 3 {
+				return append(segments, leftTiles), false
+			}
+
+			// Take straight
+			segments = append(segments, straight)
+
+			leftTiles = newTiles
+		}
+	}
+
+	return segments, true
+
 }
-*/
+func ResolveTileSegmentations(tiles []string) [][]string {
+
+	segments := make([][]string, 0)
+
+	groups := MakeSuitGroups(tiles)
+	for suit, g := range groups {
+
+		// Determine rules for suit
+		var rules *ResolverRules
+
+		switch suit {
+		case TileSuitWan, TileSuitTong, TileSuitBamboo:
+			rules = SuitedTileRule
+		case TileSuitWind, TileSuitDragon:
+			rules = HonorTileRule
+		}
+
+		ss, _ := ParseTileSegmentations(g, true, rules)
+		segments = append(segments, ss...)
+	}
+
+	return segments
+}

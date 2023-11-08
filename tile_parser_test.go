@@ -215,3 +215,62 @@ func Test_TileParser_FigureEyes_HonorTiles(t *testing.T) {
 	}
 
 }
+
+func Test_TileParser_ParseTileSegmentations(t *testing.T) {
+
+	cases := []struct {
+		Answer  [][]string
+		HasEyes bool
+		Tiles   []string
+	}{
+		{
+			[][]string{
+				{"W1", "W2", "W3"},
+				{"W4", "W5", "W6"},
+				{"W7", "W8", "W9"},
+			},
+			false,
+			[]string{"W1", "W2", "W3", "W4", "W5", "W6", "W7", "W8", "W9"},
+		},
+		{
+			[][]string{
+				{"W1", "W2", "W3"},
+				{"W4", "W5", "W6"},
+				{"W8", "W8"},
+			},
+			true,
+			[]string{"W1", "W2", "W3", "W4", "W5", "W6", "W8", "W8"},
+		},
+	}
+
+	for _, c := range cases {
+		segments, _ := ParseTileSegmentations(c.Tiles, c.HasEyes, &ResolverRules{
+			Triplet:  true,
+			Straight: true,
+		})
+		assert.ElementsMatch(t, c.Answer, segments, c.Tiles)
+	}
+}
+
+func Test_TileParser_ResolveTileSegmentations(t *testing.T) {
+
+	cases := []struct {
+		Answer [][]string
+		Tiles  []string
+	}{
+		{
+			// Two suits
+			[][]string{
+				{"B1", "B2", "B3"},
+				{"W4", "W5", "W6"},
+				{"W8", "W8"},
+			},
+			[]string{"B1", "B2", "B3", "W4", "W5", "W6", "W8", "W8"},
+		},
+	}
+
+	for _, c := range cases {
+		segments := ResolveTileSegmentations(c.Tiles)
+		assert.ElementsMatch(t, c.Answer, segments, c.Tiles)
+	}
+}
