@@ -170,6 +170,13 @@ func (pr *PointRule) FullFlush(hand *Hand) bool {
 		return false
 	}
 
+	for suit, _ := range results {
+		// No dragon and wind
+		if suit == TileSuitDragon || suit == TileSuitWind {
+			return false
+		}
+	}
+
 	return true
 }
 
@@ -182,12 +189,11 @@ func (pr *PointRule) AllHonorsHand(hand *Hand) bool {
 	// 實現判斷字一色的邏輯
 
 	tiles := append(hand.Tiles, hand.Draw...)
+	tiles = append(tiles, hand.Triplet...)
+	tiles = append(tiles, hand.Kong.Open...)
+	tiles = append(tiles, hand.Kong.Concealed...)
 
 	results := CountBySuits(tiles)
-	if len(results) != 1 {
-		return false
-	}
-
 	for suit, _ := range results {
 		if suit != TileSuitDragon && suit != TileSuitWind {
 			return false

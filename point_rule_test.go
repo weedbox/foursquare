@@ -102,6 +102,20 @@ func Test_PointRule_FullFlush(t *testing.T) {
 		{
 			false,
 			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"D1"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"D2", "D2", "D2", "D3", "D3", "D3", "D4", "D4", "D4", "I2"},
+				Draw:  []string{"I2"},
+			},
+		},
+		{
+			false,
+			&Hand{
 				Flowers: []string{"F1", "F2"},
 				Triplet: []string{"B1"},
 				Straight: [][]string{
@@ -180,5 +194,32 @@ func Test_PointRule_HalfFlush(t *testing.T) {
 
 	for i, c := range cases {
 		assert.Equal(t, c.Answer, StandardPointRule.HalfFlush(c.Hand), i)
+	}
+}
+
+func Test_PointRule_AllHonorsHand(t *testing.T) {
+
+	cases := []struct {
+		Answer bool
+		Hand   *Hand
+	}{
+		{
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"D1"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"D2", "D2", "D2", "D3", "D3", "D3", "D4", "D4", "D4", "I2"},
+				Draw:  []string{"I2"},
+			},
+		},
+	}
+
+	for i, c := range cases {
+		assert.Equal(t, c.Answer, StandardPointRule.AllHonorsHand(c.Hand), i)
 	}
 }
