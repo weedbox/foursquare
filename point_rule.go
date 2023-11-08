@@ -91,8 +91,7 @@ func (pr *PointRule) PungHand(hand *Hand) bool {
 		return false
 	}
 
-	tiles := append(hand.Tiles, hand.Draw...)
-	results := CountByTiles(tiles)
+	results := CountByTiles(hand.Tiles)
 
 	foundEyes := false
 	for _, r := range results {
@@ -120,8 +119,7 @@ func (pr *PointRule) HalfFlush(hand *Hand) bool {
 
 	// 實現判斷混一色的邏輯
 
-	tiles := append(hand.Tiles, hand.Draw...)
-	tiles = append(tiles, hand.Triplet...)
+	tiles := append(hand.Tiles, hand.Triplet...)
 	tiles = append(tiles, hand.Kong.Open...)
 	tiles = append(tiles, hand.Kong.Concealed...)
 
@@ -156,8 +154,7 @@ func (pr *PointRule) FullFlush(hand *Hand) bool {
 
 	// 實現判斷清一色的邏輯
 
-	tiles := append(hand.Tiles, hand.Draw...)
-	tiles = append(tiles, hand.Triplet...)
+	tiles := append(hand.Tiles, hand.Triplet...)
 	tiles = append(tiles, hand.Kong.Open...)
 	tiles = append(tiles, hand.Kong.Concealed...)
 
@@ -188,8 +185,7 @@ func (pr *PointRule) AllHonorsHand(hand *Hand) bool {
 
 	// 實現判斷字一色的邏輯
 
-	tiles := append(hand.Tiles, hand.Draw...)
-	tiles = append(tiles, hand.Triplet...)
+	tiles := append(hand.Tiles, hand.Triplet...)
 	tiles = append(tiles, hand.Kong.Open...)
 	tiles = append(tiles, hand.Kong.Concealed...)
 
@@ -207,7 +203,7 @@ func (pr *PointRule) BigThreeDragons(hand *Hand) bool {
 
 	// 實現判斷大三元的邏輯
 
-	tiles := append(hand.Tiles, hand.Draw...)
+	tiles := hand.Tiles
 
 	for _, t := range hand.Triplet {
 		tiles = append(tiles, t, t, t)
@@ -249,7 +245,7 @@ func (pr *PointRule) BigFourWinds(hand *Hand) bool {
 
 	// 實現判斷大四喜的邏輯
 
-	tiles := append(hand.Tiles, hand.Draw...)
+	tiles := hand.Tiles
 
 	for _, t := range hand.Triplet {
 		tiles = append(tiles, t, t, t)
