@@ -300,3 +300,44 @@ func Test_PointRule_BigThreeDragons(t *testing.T) {
 		assert.Equal(t, c.Answer, StandardPointRule.BigThreeDragons(c.Hand), i)
 	}
 }
+
+func Test_PointRule_BigFourWinds(t *testing.T) {
+
+	cases := []struct {
+		Answer bool
+		Hand   *Hand
+	}{
+		{
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"I1", "I2", "I3", "I4"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"B1", "B1", "B1", "T1"},
+				Draw:  []string{"T1"},
+			},
+		},
+		{
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"I1", "I2"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"I3", "I3", "I3", "I4", "I4", "I4", "B1", "B1", "B1", "T1"},
+				Draw:  []string{"T1"},
+			},
+		},
+	}
+
+	for i, c := range cases {
+		assert.Equal(t, c.Answer, StandardPointRule.BigFourWinds(c.Hand), i)
+	}
+}

@@ -237,6 +237,7 @@ func (pr *PointRule) BigThreeDragons(hand *Hand) bool {
 }
 
 func (pr *PointRule) FourConcealedPungs(hand *Hand) {
+
 	// 實現判斷四暗刻的邏輯
 }
 
@@ -244,8 +245,43 @@ func (pr *PointRule) SmallFourWinds(hand *Hand) {
 	// 實現判斷小四喜的邏輯
 }
 
-func (pr *PointRule) BigFourWinds(hand *Hand) {
+func (pr *PointRule) BigFourWinds(hand *Hand) bool {
+
 	// 實現判斷大四喜的邏輯
+
+	tiles := append(hand.Tiles, hand.Draw...)
+
+	for _, t := range hand.Triplet {
+		tiles = append(tiles, t, t, t)
+	}
+
+	results := CountByTiles(tiles)
+
+	// 東
+	count, ok := results["I1"]
+	if !ok || count != 3 {
+		return false
+	}
+
+	// 南
+	count, ok = results["I2"]
+	if !ok || count != 3 {
+		return false
+	}
+
+	// 西
+	count, ok = results["I3"]
+	if !ok || count != 3 {
+		return false
+	}
+
+	// 北
+	count, ok = results["I3"]
+	if !ok || count != 3 {
+		return false
+	}
+
+	return true
 }
 
 func (pr *PointRule) HeavenlyHand(hand *Hand) {
