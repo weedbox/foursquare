@@ -203,8 +203,37 @@ func (pr *PointRule) AllHonorsHand(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) BigThreeDragons(hand *Hand) {
+func (pr *PointRule) BigThreeDragons(hand *Hand) bool {
+
 	// 實現判斷大三元的邏輯
+
+	tiles := append(hand.Tiles, hand.Draw...)
+
+	for _, t := range hand.Triplet {
+		tiles = append(tiles, t, t, t)
+	}
+
+	results := CountByTiles(tiles)
+
+	// 中
+	count, ok := results["D1"]
+	if !ok || count != 3 {
+		return false
+	}
+
+	// 發
+	count, ok = results["D2"]
+	if !ok || count != 3 {
+		return false
+	}
+
+	// 白
+	count, ok = results["D3"]
+	if !ok || count != 3 {
+		return false
+	}
+
+	return true
 }
 
 func (pr *PointRule) FourConcealedPungs(hand *Hand) {

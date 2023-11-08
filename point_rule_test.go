@@ -41,6 +41,42 @@ func Test_PointRule_PungHand(t *testing.T) {
 			},
 		},
 		{
+			// 只有碰，手牌剩下眼睛
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"T1", "W2", "D3", "B4", "B6"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"T6", "T6"},
+				Draw:  []string{},
+			},
+		},
+		{
+			// 只有吃，手牌只剩眼睛
+			false,
+			&Hand{
+				Flowers: []string{"F1", "F2"},
+				Triplet: []string{},
+				Straight: [][]string{
+					{"B3", "B4", "B5"},
+					{"W3", "W4", "W5"},
+					{"T3", "T4", "T5"},
+					{"T6", "T7", "T8"},
+					{"W1", "W2", "W3"},
+				},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"W9"},
+				Draw:  []string{"W9"},
+			},
+		},
+		{
 			false,
 			&Hand{
 				Flowers: []string{"F1", "F2"},
@@ -221,5 +257,46 @@ func Test_PointRule_AllHonorsHand(t *testing.T) {
 
 	for i, c := range cases {
 		assert.Equal(t, c.Answer, StandardPointRule.AllHonorsHand(c.Hand), i)
+	}
+}
+
+func Test_PointRule_BigThreeDragons(t *testing.T) {
+
+	cases := []struct {
+		Answer bool
+		Hand   *Hand
+	}{
+		{
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"D1", "D2", "D3"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"T1", "T2", "T3", "B1", "B1", "B1", "I1"},
+				Draw:  []string{"I1"},
+			},
+		},
+		{
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"D1", "D2"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"D3", "D3", "D3", "T1", "T2", "T3", "B1", "B1", "B1", "I1"},
+				Draw:  []string{"I1"},
+			},
+		},
+	}
+
+	for i, c := range cases {
+		assert.Equal(t, c.Answer, StandardPointRule.BigThreeDragons(c.Hand), i)
 	}
 }
