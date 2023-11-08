@@ -48,47 +48,6 @@ func NewResolver(tilesOpts *TilesOptions) *Resolver {
 	}
 }
 
-func (r *Resolver) makeSuitGroups(tiles []string) map[TileSuit][]string {
-
-	groups := make(map[TileSuit][]string)
-
-	for _, t := range tiles {
-		suit := TileSuit(t[0:1])
-		g, ok := groups[suit]
-		if !ok {
-			g = make([]string, 0)
-		}
-
-		g = append(g, t)
-		groups[suit] = g
-	}
-
-	return groups
-}
-
-func (r *Resolver) aggregateTiles(tiles []string) []string {
-
-	grouped := make([]string, 0)
-	tileMap := make(map[string]int)
-
-	for _, t := range tiles {
-		m, ok := tileMap[t]
-		if !ok {
-			m = 0
-		}
-
-		m++
-
-		tileMap[t] = m
-	}
-
-	for t, _ := range tileMap {
-		grouped = append(grouped, t)
-	}
-
-	return grouped
-}
-
 func (r *Resolver) count(tiles []string, tile string) int {
 
 	count := 0
@@ -101,7 +60,7 @@ func (r *Resolver) count(tiles []string, tile string) int {
 	return count
 }
 
-func (r *Resolver) countByTiles(tiles []string, targets []string) int {
+func (r *Resolver) countTiles(tiles []string, targets []string) int {
 
 	count := 0
 	for _, t := range tiles {
@@ -159,7 +118,7 @@ func (r *Resolver) figureEyesCandidates(tiles []string, rules *ResolverRules) []
 	}
 
 	if !rules.Straight {
-		return r.aggregateTiles(tiles)
+		return AggregateTiles(tiles)
 	}
 
 	// Using first tile to figure out suit
@@ -174,9 +133,9 @@ func (r *Resolver) figureEyesCandidates(tiles []string, rules *ResolverRules) []
 	parts = append(parts)
 
 	countByPart := []int{
-		r.countByTiles(tiles, parts[0]) % 3,
-		r.countByTiles(tiles, parts[1]) % 3,
-		r.countByTiles(tiles, parts[2]) % 3,
+		r.countTiles(tiles, parts[0]) % 3,
+		r.countTiles(tiles, parts[1]) % 3,
+		r.countTiles(tiles, parts[2]) % 3,
 	}
 
 	// Find the different one
@@ -411,7 +370,7 @@ func (r *Resolver) resolveSuitTiles(suit TileSuit, tiles []string, hasEyes bool)
 
 func (r *Resolver) Resolve(tiles []string) *ResolvedState {
 
-	groups := r.makeSuitGroups(tiles)
+	groups := MakeSuitGroups(tiles)
 
 	var states []*ResolvedState
 	for suit, g := range groups {
