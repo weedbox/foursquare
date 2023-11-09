@@ -177,8 +177,38 @@ func (pr *PointRule) FullFlush(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) LittleThreeDragons(hand *Hand) {
+func (pr *PointRule) LittleThreeDragons(hand *Hand) bool {
+
 	// 實現判斷小三元的邏輯
+
+	tiles := hand.Tiles
+
+	for _, t := range hand.Triplet {
+		tiles = append(tiles, t, t, t)
+	}
+
+	results := CountByTiles(tiles)
+
+	tripletDragons := 0
+	pairDragons := 0
+	for tile, c := range results {
+
+		if tile == "D1" || tile == "D2" || tile == "D3" {
+			if c == 3 {
+				tripletDragons++
+			} else if c == 2 {
+				pairDragons++
+			} else {
+				return false
+			}
+		}
+	}
+
+	if tripletDragons != 2 || pairDragons != 1 {
+		return false
+	}
+
+	return true
 }
 
 func (pr *PointRule) AllHonorsHand(hand *Hand) bool {

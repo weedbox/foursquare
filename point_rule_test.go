@@ -438,3 +438,45 @@ func Test_PointRule_FourConcealedPungs(t *testing.T) {
 		assert.Equal(t, c.Answer, StandardPointRule.FourConcealedPungs(c.Hand), i)
 	}
 }
+
+func Test_PointRule_LittleThreeDragons(t *testing.T) {
+
+	cases := []struct {
+		Answer bool
+		Hand   *Hand
+	}{
+		{
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"D1", "D2"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"D3", "D3", "I4", "I4", "I4", "B1", "B1", "B1", "T2", "T3", "T1"},
+				Draw:  []string{"T1"},
+			},
+		},
+		{
+			// 大三元
+			false,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"D1", "D2"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"D3", "D3", "D3", "I4", "I4", "I4", "B1", "B1", "T2", "T3", "T1"},
+				Draw:  []string{"T1"},
+			},
+		},
+	}
+
+	for i, c := range cases {
+		assert.Equal(t, c.Answer, StandardPointRule.LittleThreeDragons(c.Hand), i)
+	}
+}
