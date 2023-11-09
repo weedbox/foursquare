@@ -341,3 +341,100 @@ func Test_PointRule_BigFourWinds(t *testing.T) {
 		assert.Equal(t, c.Answer, StandardPointRule.BigFourWinds(c.Hand), i)
 	}
 }
+
+func Test_PointRule_SmallFourWinds(t *testing.T) {
+
+	cases := []struct {
+		Answer bool
+		Hand   *Hand
+	}{
+		{
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"I1", "I2", "I3"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"I4", "I4", "B1", "B1", "B1", "T2", "T3", "T1"},
+				Draw:  []string{"T1"},
+			},
+		},
+		{
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"I1", "I2", "I3"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"I4", "I4", "B1", "B1", "B1", "T1", "T1", "T1"},
+				Draw:  []string{"T1"},
+			},
+		},
+	}
+
+	for i, c := range cases {
+		assert.Equal(t, c.Answer, StandardPointRule.SmallFourWinds(c.Hand), i)
+	}
+}
+
+func Test_PointRule_FourConcealedPungs(t *testing.T) {
+
+	cases := []struct {
+		Answer bool
+		Hand   *Hand
+	}{
+		{
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{
+					"T6", "T6", "T6",
+					"B9", "B9", "B9",
+					"W8", "W8", "W8",
+					"W5", "W5", "W5",
+					"T1", "T2", "T3",
+					"B1", "B1",
+				},
+				Draw: []string{"B1"},
+			},
+		},
+		{
+			// 五暗刻
+			false,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{
+					"T6", "T6", "T6",
+					"B9", "B9", "B9",
+					"W8", "W8", "W8",
+					"W5", "W5", "W5",
+					"W7", "W7", "W7",
+					"B1", "B1",
+				},
+				Draw: []string{"B1"},
+			},
+		},
+	}
+
+	for i, c := range cases {
+		assert.Equal(t, c.Answer, StandardPointRule.FourConcealedPungs(c.Hand), i)
+	}
+}

@@ -235,6 +235,21 @@ func RemoveEyes(tiles []string, rules *ResolverRules) ([]string, string) {
 
 }
 
+func IsTriplet(tiles []string) bool {
+
+	if len(tiles) != 3 {
+		return false
+	}
+
+	for _, t := range tiles {
+		if t != tiles[0] {
+			return false
+		}
+	}
+
+	return true
+}
+
 func CheckWinningTiles(tiles []string, hasEyes bool, rules *ResolverRules) bool {
 
 	if len(tiles) == 0 {
@@ -330,10 +345,13 @@ func ParseTileSegmentations(tiles []string, hasEyes bool, rules *ResolverRules) 
 
 		// Is triplet
 		if rules.Triplet {
+
 			if CountSpecificTile(leftTiles, leftTiles[0]) >= 3 {
 
+				selected := leftTiles[0:3]
+
 				// Take triplet
-				segments = append(segments, leftTiles[1:3])
+				segments = append(segments, selected)
 
 				// Attempt to remove triplet
 				leftTiles = leftTiles[3:len(leftTiles)]
@@ -383,7 +401,13 @@ func ResolveTileSegmentations(tiles []string) [][]string {
 			rules = HonorTileRule
 		}
 
-		ss, _ := ParseTileSegmentations(g, true, rules)
+		hasEyes := false
+		if len(g)%3 != 0 {
+			hasEyes = true
+		}
+
+		ss, _ := ParseTileSegmentations(g, hasEyes, rules)
+
 		segments = append(segments, ss...)
 	}
 

@@ -232,13 +232,63 @@ func (pr *PointRule) BigThreeDragons(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) FourConcealedPungs(hand *Hand) {
+func (pr *PointRule) FourConcealedPungs(hand *Hand) bool {
 
 	// 實現判斷四暗刻的邏輯
+
+	segments := ResolveTileSegmentations(hand.Tiles)
+
+	// 4 pungs + eyes
+	if len(segments) < 5 {
+		return false
+	}
+
+	count := 0
+	for _, s := range segments {
+		if IsTriplet(s) {
+			count++
+		}
+	}
+
+	if count != 4 {
+		return false
+	}
+
+	return true
 }
 
-func (pr *PointRule) SmallFourWinds(hand *Hand) {
+func (pr *PointRule) SmallFourWinds(hand *Hand) bool {
+
 	// 實現判斷小四喜的邏輯
+
+	tiles := hand.Tiles
+
+	for _, t := range hand.Triplet {
+		tiles = append(tiles, t, t, t)
+	}
+
+	results := CountByTiles(tiles)
+
+	tripletWinds := 0
+	pairWinds := 0
+	for tile, c := range results {
+
+		if tile == "I1" || tile == "I2" || tile == "I3" || tile == "I4" {
+			if c == 3 {
+				tripletWinds++
+			} else if c == 2 {
+				pairWinds++
+			} else {
+				return false
+			}
+		}
+	}
+
+	if tripletWinds != 3 || pairWinds != 1 {
+		return false
+	}
+
+	return true
 }
 
 func (pr *PointRule) BigFourWinds(hand *Hand) bool {
@@ -274,6 +324,19 @@ func (pr *PointRule) BigFourWinds(hand *Hand) bool {
 	// 北
 	count, ok = results["I3"]
 	if !ok || count != 3 {
+		return false
+	}
+
+	// It should be 4 triplets
+	count = 0
+	for _, c := range results {
+
+		if c == 3 {
+			count++
+		}
+	}
+
+	if count > 4 {
 		return false
 	}
 

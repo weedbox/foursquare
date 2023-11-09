@@ -42,17 +42,6 @@ func NewResolver(tilesOpts *TilesOptions) *Resolver {
 	}
 }
 
-func (r *Resolver) isTriplet(tiles []string) bool {
-
-	for _, t := range tiles {
-		if t != tiles[0] {
-			return false
-		}
-	}
-
-	return true
-}
-
 func (r *Resolver) figureReadyHandConditions(suit TileSuit, tiles []string, rules *ResolverRules) (bool, []string) {
 
 	var candidates []string
