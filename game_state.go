@@ -25,6 +25,7 @@ type PlayerState struct {
 type Status struct {
 	CurrentTileSetPosition    int `json:"cur_tpos"`
 	CurrentSupplementPosition int `json:"cur_spos"`
+	CurrentPlayer             int `json:"cur_player"`
 }
 
 func NewGameState() *GameState {
