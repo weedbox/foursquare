@@ -38,12 +38,6 @@ func (g *Game) InitializeGame() error {
 	return g.triggerEvent(GameEvent_GameInitialized, nil)
 }
 
-// WaitForAllPlayersReady 等待玩家準備完成
-func (g *Game) WaitForAllPlayersReady() error {
-	// 實現等待玩家準備完成的邏輯
-	return g.triggerEvent(GameEvent_GameInitialized, nil) //TODO
-}
-
 func (g *Game) StartAtBanker() error {
 	g.gs.Status.CurrentPlayer = 0
 	return g.triggerEvent(GameEvent_PlayerSelected, nil)
@@ -53,12 +47,6 @@ func (g *Game) StartAtBanker() error {
 func (g *Game) CheckPlayerContext() error {
 	// 實現檢查玩家動作的情境的邏輯
 	return g.triggerEvent(GameEvent_Chow, nil)
-}
-
-// WaitForPlayerToDiscardTile 等待選一張打出或打出後聽牌
-func (g *Game) WaitForPlayerToDiscardTile() error {
-	// 實現等待選一張打出或打出後聽牌的邏輯
-	return g.triggerEvent(GameEvent_GameInitialized, nil)
 }
 
 // DrawSupplementTIle 玩家補牌
@@ -71,18 +59,6 @@ func (g *Game) DrawSupplementTile() error {
 func (g *Game) Draw() error {
 	// 實現玩家摸牌的邏輯
 	return g.triggerEvent(GameEvent_Drawn, nil)
-}
-
-// WaitForPlayerAction 等待當前玩家動作
-func (g *Game) WaitForPlayerAction() error {
-	// 實現等待當前玩家動作的邏輯
-	return g.triggerEvent(GameEvent_GameInitialized, nil)
-}
-
-// WaitForReaction 等待其他玩家反應
-func (g *Game) WaitForReaction() error {
-	// 實現等待其他玩家反應的邏輯
-	return g.triggerEvent(GameEvent_GameInitialized, nil)
 }
 
 // NextPlayer 決定下一家為可動作玩家
@@ -113,4 +89,21 @@ func (g *Game) DoSettlement() error {
 func (g *Game) CloseGame() error {
 	// 實現結束牌局的邏輯
 	return g.triggerEvent(GameEvent_GameClosed, nil)
+}
+
+// Wait for external input
+func (g *Game) WaitForAllPlayersReady() error {
+	return g.triggerEvent(GameEvent_WaitForAllPlayersReady, nil)
+}
+
+func (g *Game) WaitForPlayerToDiscardTile() error {
+	return g.triggerEvent(GameEvent_WaitForPlayerToDiscardTile, nil)
+}
+
+func (g *Game) WaitForPlayerAction() error {
+	return g.triggerEvent(GameEvent_WaitForPlayerAction, nil)
+}
+
+func (g *Game) WaitForReaction() error {
+	return g.triggerEvent(GameEvent_WaitForReaction, nil)
 }
