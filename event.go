@@ -1,7 +1,5 @@
 package foursquare
 
-import "fmt"
-
 type GameEvent int32
 
 const (
@@ -139,116 +137,79 @@ func (g *Game) triggerEvent(ge GameEvent, payload interface{}) error {
 	return nil
 }
 
-// onGameStarted 處理遊戲開始的事件
 func (g *Game) onGameStarted(payload interface{}) error {
-	fmt.Println("遊戲開始:", payload)
-	return nil
+	return g.InitializeGame()
 }
 
-// onGameInitialized 處理遊戲初始化的事件
 func (g *Game) onGameInitialized(payload interface{}) error {
-	fmt.Println("遊戲初始化完成:", payload)
-	return nil
+	return g.WaitForAllPlayersReady()
 }
 
-// onAllPlayersReady 處理所有玩家準備完成的事件
 func (g *Game) onAllPlayersReady(payload interface{}) error {
-	fmt.Println("所有玩家已準備好:", payload)
-	return nil
+	return g.StartAtBanker()
 }
 
-// onPlayerSelected 處理玩家被選定的事件
 func (g *Game) onPlayerSelected(payload interface{}) error {
-	fmt.Println("玩家已選定:", payload)
-	return nil
+	return g.CheckPlayerContext()
 }
 
-// onChow 處理吃牌動作的事件
 func (g *Game) onChow(payload interface{}) error {
-	fmt.Println("執行了吃牌動作:", payload)
-	return nil
+	return g.WaitForPlayerToDiscardTile()
 }
 
-// onPung 處理碰牌動作的事件
 func (g *Game) onPung(payload interface{}) error {
-	fmt.Println("執行了碰牌動作:", payload)
-	return nil
+	return g.WaitForPlayerToDiscardTile()
 }
 
-// onDiscardActions 處理放棄動作的事件
 func (g *Game) onDiscardActions(payload interface{}) error {
-	fmt.Println("放棄動作:", payload)
-	return nil
+	return g.WaitForPlayerToDiscardTile()
 }
 
-// onKong 處理槓牌動作的事件
 func (g *Game) onKong(payload interface{}) error {
-	fmt.Println("執行了槓牌動作:", payload)
-	return nil
+	return g.DrawSupplementTile()
 }
 
-// onConcealedKong 處理暗槓動作的事件
 func (g *Game) onConcealedKong(payload interface{}) error {
-	fmt.Println("執行了暗槓動作:", payload)
-	return nil
+	return g.DrawSupplementTile()
 }
 
-// onNormalState 處理正常情境的事件
 func (g *Game) onNormalState(payload interface{}) error {
-	fmt.Println("正常情境:", payload)
-	return nil
+	return g.Draw()
 }
 
-// onDrawn 處理玩家摸牌的事件
 func (g *Game) onDrawn(payload interface{}) error {
-	fmt.Println("玩家已摸牌:", payload)
-	return nil
+	return g.WaitForPlayerAction()
 }
 
-// onFlowerTileDrawn 處理玩家抓到花牌的事件
 func (g *Game) onFlowerTileDrawn(payload interface{}) error {
-	fmt.Println("玩家抓到花牌:", payload)
-	return nil
+	return g.DrawSupplementTile()
 }
 
-// onTileDiscarded 處理牌被打出的事件
 func (g *Game) onTileDiscarded(payload interface{}) error {
-	fmt.Println("牌已被打出:", payload)
-	return nil
+	return g.WaitForPlayerAction()
 }
 
-// onNoReactions 處理其他玩家無反應的事件
 func (g *Game) onNoReactions(payload interface{}) error {
-	fmt.Println("其他玩家無反應:", payload)
-	return nil
+	return g.NextPlayer()
 }
 
-// onPlayerReacted 處理玩家反應的事件
 func (g *Game) onPlayerReacted(payload interface{}) error {
-	fmt.Println("玩家已反應:", payload)
-	return nil
+	//TODO
+	return g.SelectPlayer()
 }
 
-// onNoMoreTiles 處理摸不到牌的事件
 func (g *Game) onNoMoreTiles(payload interface{}) error {
-	fmt.Println("玩家摸不到牌:", payload)
-	return nil
+	return g.DrawGame()
 }
 
-// onGameDrawn 處理遊戲流局的事件
 func (g *Game) onGameDrawn(payload interface{}) error {
-	fmt.Println("遊戲流局:", payload)
-	return nil
+	return g.DoSettlement()
 }
 
-// onWin 處理胡牌的事件
 func (g *Game) onWin(payload interface{}) error {
-	fmt.Println("玩家胡牌:", payload)
-	return nil
+	return g.DoSettlement()
 }
 
-// onSettlement 處理遊戲結算的事件
 func (g *Game) onSettlement(payload interface{}) error {
-	fmt.Println("進行遊戲結算:", payload)
-	return nil
+	return g.CloseGame()
 }
