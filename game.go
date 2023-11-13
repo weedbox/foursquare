@@ -13,6 +13,7 @@ var (
 	ErrPlayerHasNoSuchTile       = errors.New("game: player has no such tile")
 	ErrInvalidPlayer             = errors.New("game: invalid player")
 	ErrInvalidReaction           = errors.New("game: invalid reaction")
+	ErrInvalidAction             = errors.New("game: invalid action")
 )
 
 type Game struct {
@@ -139,6 +140,11 @@ func (g *Game) Draw() error {
 
 func (g *Game) NextPlayer() error {
 
+	// Reset allowed actions for previous player
+	ps := g.GetCurrentPlayer()
+	ps.ResetAllowedActions()
+
+	// Next player
 	if g.gs.Status.CurrentPlayer == len(g.gs.Players)-1 {
 		g.gs.Status.CurrentPlayer = 0
 	} else {
@@ -154,6 +160,11 @@ func (g *Game) SelectPlayer(playerIdx int, ctx string) error {
 		return ErrInvalidPlayer
 	}
 
+	// Reset allowed actions for previous player
+	ps := g.GetCurrentPlayer()
+	ps.ResetAllowedActions()
+
+	// New player
 	g.gs.Status.CurrentPlayer = playerIdx
 
 	return g.triggerEvent(GameEvent_PlayerSelected, ctx)
@@ -176,6 +187,9 @@ func (g *Game) React(playerIdx int, reaction string) error {
 		return ErrInvalidReaction
 	}
 
+	// Reset allowed actions
+	ps.ResetAllowedActions()
+
 	return g.triggerEvent(GameEvent_PlayerReacted, &PlayerReacted{
 		PlayerIdx: playerIdx,
 		Reaction:  reaction,
@@ -185,6 +199,10 @@ func (g *Game) React(playerIdx int, reaction string) error {
 func (g *Game) DiscardTile(tile string, isReadyHand bool) error {
 
 	ps := g.GetCurrentPlayer()
+
+	if !ps.IsAllowedAction("discard") {
+		return ErrInvalidAction
+	}
 
 	if ps.IsReadyHand {
 		ps.Hand.DiscardDrawTile()
@@ -224,7 +242,11 @@ func (g *Game) WaitForAllPlayersReady() error {
 }
 
 func (g *Game) WaitForPlayerToDiscardTile() error {
-	//TODO: Preparing allowed actions for player
+
+	// Preparing allowed actions for player
+	ps := g.GetCurrentPlayer()
+	ps.AllowedActions = []string{"discard"}
+
 	return g.triggerEvent(GameEvent_WaitForPlayerToDiscardTile, nil)
 }
 

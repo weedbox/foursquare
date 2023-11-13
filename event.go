@@ -93,6 +93,8 @@ var GameEventBySymbol = map[string]GameEvent{
 
 func (g *Game) triggerEvent(ge GameEvent, payload interface{}) error {
 
+	g.gs.Status.CurrentEvent = GameEventSymbols[ge]
+
 	switch ge {
 	case GameEvent_GameStarted:
 		return g.onGameStarted(payload)

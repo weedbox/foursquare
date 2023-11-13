@@ -46,3 +46,7 @@ func (ps *PlayerState) IsAllowedAction(action string) bool {
 
 	return false
 }
+
+func (ps *PlayerState) ResetAllowedActions() {
+	ps.AllowedActions = []string{}
+}
