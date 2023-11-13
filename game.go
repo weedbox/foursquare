@@ -11,6 +11,7 @@ var (
 	ErrNoTiles                   = errors.New("game: no tiles")
 	ErrInsufficientNumberOfDices = errors.New("game: insufficient number of dices")
 	ErrPlayerHasNoSuchTile       = errors.New("game: player has no such tile")
+	ErrInvalidPlayer             = errors.New("game: invalid player")
 )
 
 type Game struct {
@@ -137,10 +138,15 @@ func (g *Game) NextPlayer() error {
 	return g.triggerEvent(GameEvent_PlayerSelected, "normal")
 }
 
-// SelectPlayer 決定反應玩家為可動作玩家
-func (g *Game) SelectPlayer() error {
-	// 實現決定反應玩家為可動作玩家的邏輯
-	return g.triggerEvent(GameEvent_PlayerSelected, nil)
+func (g *Game) SelectPlayer(playerIdx int, ctx string) error {
+
+	if playerIdx < 0 || playerIdx >= g.gs.Meta.PlayerCount {
+		return ErrInvalidPlayer
+	}
+
+	g.gs.Status.CurrentPlayer = playerIdx
+
+	return g.triggerEvent(GameEvent_PlayerSelected, ctx)
 }
 
 func (g *Game) DiscardTile(tile string, isReadyHand bool) error {

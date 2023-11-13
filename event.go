@@ -199,9 +199,13 @@ func (g *Game) onNoReactions(payload interface{}) error {
 	return g.NextPlayer()
 }
 
-func (g *Game) onPlayerReacted(payload interface{}) error {
-	//TODO
-	return g.SelectPlayer()
+func (g *Game) onPlayerReacted(playerIdx int, ctx interface{}) error {
+
+	if ctx == nil {
+		return g.SelectPlayer(playerIdx, "normal")
+	}
+
+	return g.SelectPlayer(playerIdx, ctx.(string))
 }
 
 func (g *Game) onNoMoreTiles(payload interface{}) error {
