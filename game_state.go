@@ -17,15 +17,18 @@ type Meta struct {
 }
 
 type PlayerState struct {
-	Idx      int   `json:"idx"`
-	IsBanker bool  `json:"is_banker"`
-	Hand     *Hand `json:"hand"`
+	Idx         int      `json:"idx"`
+	IsBanker    bool     `json:"is_banker"`
+	IsReadyHand bool     `json:"is_ready_hand"`
+	Hand        *Hand    `json:"hand"`
+	Actions     []string `json:"actions"`
 }
 
 type Status struct {
-	CurrentTileSetPosition    int `json:"cur_tpos"`
-	CurrentSupplementPosition int `json:"cur_spos"`
-	CurrentPlayer             int `json:"cur_player"`
+	CurrentTileSetPosition    int      `json:"cur_tpos"`
+	CurrentSupplementPosition int      `json:"cur_spos"`
+	CurrentPlayer             int      `json:"cur_player"`
+	DiscardArea               []string `json:"discard_area"`
 }
 
 func NewGameState() *GameState {

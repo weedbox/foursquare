@@ -18,7 +18,7 @@ func Test_Internal_DrawTiles(t *testing.T) {
 	g.gs.Status.CurrentTileSetPosition = 0
 	g.gs.Status.CurrentSupplementPosition = len(g.gs.Meta.Tiles) - 1
 
-	tiles := g.drawTiles(3)
+	tiles := g.dealTiles(3)
 
 	assert.ElementsMatch(t, []string{"W1", "F1", "W3"}, tiles)
 }

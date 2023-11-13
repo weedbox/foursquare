@@ -149,8 +149,14 @@ func (g *Game) onAllPlayersReady(payload interface{}) error {
 	return g.StartAtBanker()
 }
 
-func (g *Game) onPlayerSelected(payload interface{}) error {
-	return g.CheckPlayerContext()
+// ctx: normal, chow, pung, kong, win
+func (g *Game) onPlayerSelected(ctx interface{}) error {
+
+	if ctx == nil {
+		return g.CheckPlayerContext("normal")
+	}
+
+	return g.CheckPlayerContext(ctx.(string))
 }
 
 func (g *Game) onChow(payload interface{}) error {
@@ -185,7 +191,7 @@ func (g *Game) onFlowerTileDrawn(payload interface{}) error {
 	return g.DrawSupplementTile()
 }
 
-func (g *Game) onTileDiscarded(payload interface{}) error {
+func (g *Game) onTileDiscarded(tile interface{}) error {
 	return g.WaitForPlayerAction()
 }
 

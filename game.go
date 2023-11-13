@@ -10,6 +10,7 @@ import (
 var (
 	ErrNoTiles                   = errors.New("game: no tiles")
 	ErrInsufficientNumberOfDices = errors.New("game: insufficient number of dices")
+	ErrPlayerHasNoSuchTile       = errors.New("game: player has no such tile")
 )
 
 type Game struct {
@@ -35,6 +36,10 @@ func NewGameWithState(gs *GameState) *Game {
 	return &Game{
 		gs: gs,
 	}
+}
+
+func (g *Game) GetCurrentPlayer() *PlayerState {
+	return &g.gs.Players[g.gs.Status.CurrentPlayer]
 }
 
 func (g *Game) StartGame() error {
@@ -70,28 +75,66 @@ func (g *Game) StartAtBanker() error {
 	return g.triggerEvent(GameEvent_PlayerSelected, nil)
 }
 
-// CheckPlayerContext 檢查玩家動作的情境
-func (g *Game) CheckPlayerContext() error {
-	// 實現檢查玩家動作的情境的邏輯
-	return g.triggerEvent(GameEvent_Chow, nil)
+func (g *Game) CheckPlayerContext(ctx string) error {
+
+	switch ctx {
+	case "chow":
+		return g.triggerEvent(GameEvent_Chow, nil)
+	case "pung":
+		return g.triggerEvent(GameEvent_Kong, nil)
+	case "kong":
+		return g.triggerEvent(GameEvent_Kong, nil)
+	case "win":
+		return g.triggerEvent(GameEvent_Win, nil)
+	}
+
+	return g.triggerEvent(GameEvent_NormalState, nil)
 }
 
-// DrawSupplementTIle 玩家補牌
 func (g *Game) DrawSupplementTile() error {
-	// 實現玩家補牌的邏輯
-	return g.triggerEvent(GameEvent_GameInitialized, nil)
-}
 
-// Draw 玩家摸牌
-func (g *Game) Draw() error {
-	// 實現玩家摸牌的邏輯
+	ps := g.GetCurrentPlayer()
+
+	tile, flowerTiles := g.drawSupplementTile()
+
+	if tile == "" {
+		return g.triggerEvent(GameEvent_NoMoreTiles, nil)
+	}
+
+	ps.Hand.Flowers = append(ps.Hand.Flowers, flowerTiles...)
+	ps.Hand.Deal([]string{tile})
+
 	return g.triggerEvent(GameEvent_Drawn, nil)
 }
 
-// NextPlayer 決定下一家為可動作玩家
+func (g *Game) Draw() error {
+
+	tiles := g.dealTiles(1)
+	if len(tiles) == 0 {
+		return g.triggerEvent(GameEvent_NoMoreTiles, nil)
+	}
+
+	ps := g.GetCurrentPlayer()
+
+	if TileSuit(tiles[0][0:1]) == TileSuitFlower {
+		ps.Hand.Flowers = append(ps.Hand.Flowers, tiles...)
+		return g.triggerEvent(GameEvent_FlowerTileDrawn, nil)
+	}
+
+	ps.Hand.Deal(tiles)
+
+	return g.triggerEvent(GameEvent_Drawn, nil)
+}
+
 func (g *Game) NextPlayer() error {
-	// 實現決定下一家為可動作玩家的邏輯
-	return g.triggerEvent(GameEvent_PlayerSelected, nil)
+
+	if g.gs.Status.CurrentPlayer == len(g.gs.Players)-1 {
+		g.gs.Status.CurrentPlayer = 0
+	} else {
+		g.gs.Status.CurrentPlayer++
+	}
+
+	return g.triggerEvent(GameEvent_PlayerSelected, "normal")
 }
 
 // SelectPlayer 決定反應玩家為可動作玩家
@@ -100,9 +143,29 @@ func (g *Game) SelectPlayer() error {
 	return g.triggerEvent(GameEvent_PlayerSelected, nil)
 }
 
-// DrawGame 流局
+func (g *Game) DiscardTile(tile string, isReadyHand bool) error {
+
+	ps := g.GetCurrentPlayer()
+
+	if ps.IsReadyHand {
+		ps.Hand.DiscardDrawTile()
+	} else {
+
+		if !ps.Hand.Discard(tile) {
+			return ErrPlayerHasNoSuchTile
+		}
+
+		if isReadyHand {
+			ps.IsReadyHand = true
+		}
+	}
+
+	g.gs.Status.DiscardArea = append(g.gs.Status.DiscardArea, tile)
+
+	return g.triggerEvent(GameEvent_TileDiscarded, nil)
+}
+
 func (g *Game) DrawGame() error {
-	// 實現處理流局的邏輯
 	return g.triggerEvent(GameEvent_GameDrawn, nil)
 }
 
@@ -112,9 +175,7 @@ func (g *Game) DoSettlement() error {
 	return g.triggerEvent(GameEvent_Settlement, nil)
 }
 
-// CloseGame 結束牌局
 func (g *Game) CloseGame() error {
-	// 實現結束牌局的邏輯
 	return g.triggerEvent(GameEvent_GameClosed, nil)
 }
 

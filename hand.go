@@ -27,3 +27,43 @@ func NewHand() *Hand {
 		Draw:  make([]string, 0),
 	}
 }
+
+func (h *Hand) Deal(tiles []string) {
+	h.Draw = tiles
+	h.Tiles = append(h.Tiles, tiles...)
+}
+
+func (h *Hand) Exists(tile string) bool {
+
+	for _, t := range h.Tiles {
+		if tile == t {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (h *Hand) Discard(tile string) bool {
+
+	for i, t := range h.Tiles {
+		if t == tile {
+			h.Tiles = append(h.Tiles[:i], h.Tiles[i+1:]...)
+			return true
+		}
+	}
+
+	return false
+}
+
+func (h *Hand) DiscardDrawTile() bool {
+
+	for i, t := range h.Tiles {
+		if t == h.Draw[0] {
+			h.Tiles = append(h.Tiles[:i], h.Tiles[i+1:]...)
+			return true
+		}
+	}
+
+	return false
+}

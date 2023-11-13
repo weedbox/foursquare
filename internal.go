@@ -1,6 +1,26 @@
 package foursquare
 
-func (g *Game) drawTiles(count int) []string {
+func (g *Game) drawTile() (string, []string) {
+
+	var tile string
+	var flowerTiles []string
+
+	tile = g.gs.Meta.Tiles[g.gs.Status.CurrentTileSetPosition]
+	g.gs.Status.CurrentTileSetPosition++
+
+	if TileSuit(tile[0:1]) == TileSuitFlower {
+		flowerTiles = append(flowerTiles, tile)
+	}
+
+	t, fts := g.drawSupplementTile()
+
+	tile = t
+	flowerTiles = append(flowerTiles, fts...)
+
+	return tile, flowerTiles
+}
+
+func (g *Game) dealTiles(count int) []string {
 
 	tiles := make([]string, 0, count)
 
@@ -56,7 +76,7 @@ func (g *Game) initializeHandTiles() {
 	for i := 0; i < g.gs.Meta.HandTileCount; i++ {
 
 		for _, ps := range g.gs.Players {
-			ps.Hand.Tiles = append(ps.Hand.Tiles, g.drawTiles(1)...)
+			ps.Hand.Tiles = append(ps.Hand.Tiles, g.dealTiles(1)...)
 		}
 	}
 
