@@ -12,6 +12,7 @@ var (
 	ErrInsufficientNumberOfDices = errors.New("game: insufficient number of dices")
 	ErrPlayerHasNoSuchTile       = errors.New("game: player has no such tile")
 	ErrInvalidPlayer             = errors.New("game: invalid player")
+	ErrInvalidReaction           = errors.New("game: invalid reaction")
 )
 
 type Game struct {
@@ -40,6 +41,15 @@ func NewGameWithState(gs *GameState) *Game {
 }
 
 func (g *Game) GetCurrentPlayer() *PlayerState {
+	return &g.gs.Players[g.gs.Status.CurrentPlayer]
+}
+
+func (g *Game) GetPlayer(playerIdx int) *PlayerState {
+
+	if playerIdx < 0 || playerIdx >= len(g.gs.Players) {
+		return nil
+	}
+
 	return &g.gs.Players[g.gs.Status.CurrentPlayer]
 }
 
@@ -149,6 +159,29 @@ func (g *Game) SelectPlayer(playerIdx int, ctx string) error {
 	return g.triggerEvent(GameEvent_PlayerSelected, ctx)
 }
 
+func (g *Game) React(playerIdx int, reaction string) error {
+
+	// No any reactions
+	if playerIdx == -1 {
+		return g.triggerEvent(GameEvent_NoReactions, nil)
+	}
+
+	// check if reaction is valid
+	ps := g.GetPlayer(playerIdx)
+	if ps == nil {
+		return ErrInvalidPlayer
+	}
+
+	if !ps.IsAllowedAction(reaction) {
+		return ErrInvalidReaction
+	}
+
+	return g.triggerEvent(GameEvent_PlayerReacted, &PlayerReacted{
+		PlayerIdx: playerIdx,
+		Reaction:  reaction,
+	})
+}
+
 func (g *Game) DiscardTile(tile string, isReadyHand bool) error {
 
 	ps := g.GetCurrentPlayer()
@@ -191,13 +224,16 @@ func (g *Game) WaitForAllPlayersReady() error {
 }
 
 func (g *Game) WaitForPlayerToDiscardTile() error {
+	//TODO: Preparing allowed actions for player
 	return g.triggerEvent(GameEvent_WaitForPlayerToDiscardTile, nil)
 }
 
 func (g *Game) WaitForPlayerAction() error {
+	//TODO: Preparing allowed actions for player
 	return g.triggerEvent(GameEvent_WaitForPlayerAction, nil)
 }
 
 func (g *Game) WaitForReaction() error {
+	//TODO: Preparing allowed actions for the rest of players
 	return g.triggerEvent(GameEvent_WaitForReaction, nil)
 }

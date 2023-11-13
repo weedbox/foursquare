@@ -17,14 +17,15 @@ type Meta struct {
 }
 
 type PlayerState struct {
-	Idx         int      `json:"idx"`
-	IsBanker    bool     `json:"is_banker"`
-	IsReadyHand bool     `json:"is_ready_hand"`
-	Hand        *Hand    `json:"hand"`
-	Actions     []string `json:"actions"`
+	Idx            int      `json:"idx"`
+	IsBanker       bool     `json:"is_banker"`
+	IsReadyHand    bool     `json:"is_ready_hand"`
+	Hand           *Hand    `json:"hand"`
+	AllowedActions []string `json:"allowed_actions"`
 }
 
 type Status struct {
+	CurrentEvent              string   `json:"cur_event"`
 	CurrentTileSetPosition    int      `json:"cur_tpos"`
 	CurrentSupplementPosition int      `json:"cur_spos"`
 	CurrentPlayer             int      `json:"cur_player"`
@@ -33,4 +34,15 @@ type Status struct {
 
 func NewGameState() *GameState {
 	return &GameState{}
+}
+
+func (ps *PlayerState) IsAllowedAction(action string) bool {
+
+	for _, aa := range ps.AllowedActions {
+		if aa == action {
+			return true
+		}
+	}
+
+	return false
 }

@@ -1,5 +1,11 @@
 package foursquare
 
+import "errors"
+
+var (
+	ErrInvalidEventPayload = errors.New("event: invalid event payload")
+)
+
 type GameEvent int32
 
 const (
@@ -199,13 +205,15 @@ func (g *Game) onNoReactions(payload interface{}) error {
 	return g.NextPlayer()
 }
 
-func (g *Game) onPlayerReacted(playerIdx int, ctx interface{}) error {
+func (g *Game) onPlayerReacted(payload interface{}) error {
 
-	if ctx == nil {
-		return g.SelectPlayer(playerIdx, "normal")
+	if payload == nil {
+		return ErrInvalidEventPayload
 	}
 
-	return g.SelectPlayer(playerIdx, ctx.(string))
+	p := payload.(*PlayerReacted)
+
+	return g.SelectPlayer(p.PlayerIdx, p.Reaction)
 }
 
 func (g *Game) onNoMoreTiles(payload interface{}) error {
