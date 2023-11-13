@@ -1,15 +1,25 @@
 package foursquare
 
+import (
+	"errors"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+var (
+	ErrNoTiles                   = errors.New("game: no tiles")
+	ErrInsufficientNumberOfDices = errors.New("game: insufficient number of dices")
+)
+
 type Game struct {
-	opts *Options
-	gs   *GameState
+	gs *GameState
 }
 
 func NewGame(opts *Options) *Game {
 
 	g := &Game{
-		opts: opts,
-		gs:   NewGameState(),
+		gs: NewGameState(),
 	}
 
 	// Apply options
@@ -21,9 +31,26 @@ func NewGame(opts *Options) *Game {
 	return g
 }
 
-// StartGame 開始牌局
+func NewGameWithState(gs *GameState) *Game {
+	return &Game{
+		gs: gs,
+	}
+}
+
 func (g *Game) StartGame() error {
-	// 實現開始牌局的邏輯
+
+	if len(g.gs.Meta.Dices) != 2 {
+		return ErrInsufficientNumberOfDices
+	}
+
+	if len(g.gs.Meta.Tiles) == 0 {
+		return ErrNoTiles
+	}
+
+	g.gs.GameID = uuid.New().String()
+	g.gs.CreatedAt = time.Now().Unix()
+	g.gs.UpdatedAt = time.Now().Unix()
+
 	return g.triggerEvent(GameEvent_GameStarted, nil)
 }
 
