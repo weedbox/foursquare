@@ -1,5 +1,10 @@
 package foursquare
 
+import (
+	"fmt"
+	"strconv"
+)
+
 type Kong struct {
 	Open      []string `json:"open"`
 	Concealed []string `json:"concealed"`
@@ -68,27 +73,98 @@ func (h *Hand) DiscardDrawTile() bool {
 	return false
 }
 
-func (h *Hand) FigureActions() []string {
+func (h *Hand) FigureStraightCandidate(tile string) [][]string {
 
-	var actions []string
+	var candidates [][]string
+
+	suit := tile[0:1]
+
+	tileNumber, err := strconv.Atoi(tile[1:])
+	if err != nil {
+		return candidates
+	}
+
+	possibleCombos := [][]int{
+		{tileNumber - 2, tileNumber - 1},
+		{tileNumber - 1, tileNumber + 1},
+		{tileNumber + 1, tileNumber + 2},
+	}
+
+	for _, combo := range possibleCombos {
+
+		if combo[0] < 1 || combo[1] > 9 {
+			continue
+		}
+
+		t1 := fmt.Sprintf("%s%d", suit, combo[0])
+		t2 := fmt.Sprintf("%s%d", suit, combo[1])
+
+		if ContainsTile(h.Tiles, t1) && ContainsTile(h.Tiles, t2) {
+			candidates = append(candidates, []string{t1, t2})
+		}
+	}
+
+	return candidates
+
+}
+
+func (h *Hand) FigureActions() []*Action {
+
+	var actions []*Action
 
 	// Win by self draw
-	isWin := CheckWinningTiles(h.Tiles, true, &ResolverRules{
+	isWin := CheckWinningTiles(h.Tiles, true, SuitedTileRule)
+
+	if isWin {
+		actions = append(actions, &Action{Name: "win"})
+	}
+
+	// Concealed kong
+	if CountSpecificTile(h.Tiles, h.Draw[0]) == 4 {
+		actions = append(actions, &Action{Name: "kong"})
+	}
+
+	if len(actions) > 0 {
+		actions = append(actions, &Action{Name: "discard"})
+	}
+
+	return actions
+}
+
+func (h *Hand) FigureReactions(tile string, relativeSeatIdx int) []*Action {
+
+	var actions []*Action
+
+	// Win
+	tiles := append(h.Tiles, tile)
+	isWin := CheckWinningTiles(tiles, true, &ResolverRules{
 		Triplet:  true,
 		Straight: true,
 	})
 
 	if isWin {
-		actions = append(actions, "win")
+		actions = append(actions, &Action{Name: "win"})
 	}
 
-	// Concealed kong
-	if CountSpecificTile(h.Tiles, h.Draw[0]) == 4 {
-		actions = append(actions, "kong")
+	// Kong
+	if CountSpecificTile(h.Tiles, tile) == 3 {
+		actions = append(actions, &Action{Name: "kong"})
 	}
 
-	if len(actions) > 0 {
-		actions = append(actions, "discard")
+	// Pung
+	if CountSpecificTile(h.Tiles, tile) == 2 {
+		actions = append(actions, &Action{Name: "pung"})
+	}
+
+	if relativeSeatIdx == 1 {
+		// Chow
+		candidates := h.FigureStraightCandidate(tile)
+		if len(candidates) != 0 {
+			actions = append(actions, &Action{
+				Name:       "chow",
+				Candidates: candidates,
+			})
+		}
 	}
 
 	return actions

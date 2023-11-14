@@ -17,11 +17,11 @@ type Meta struct {
 }
 
 type PlayerState struct {
-	Idx            int      `json:"idx"`
-	IsBanker       bool     `json:"is_banker"`
-	IsReadyHand    bool     `json:"is_ready_hand"`
-	Hand           *Hand    `json:"hand"`
-	AllowedActions []string `json:"allowed_actions"`
+	Idx            int       `json:"idx"`
+	IsBanker       bool      `json:"is_banker"`
+	IsReadyHand    bool      `json:"is_ready_hand"`
+	Hand           *Hand     `json:"hand"`
+	AllowedActions []*Action `json:"allowed_actions"`
 }
 
 type Status struct {
@@ -38,8 +38,8 @@ func NewGameState() *GameState {
 
 func (ps *PlayerState) IsAllowedAction(action string) bool {
 
-	for _, aa := range ps.AllowedActions {
-		if aa == action {
+	for _, a := range ps.AllowedActions {
+		if a.Name == action {
 			return true
 		}
 	}
@@ -48,5 +48,15 @@ func (ps *PlayerState) IsAllowedAction(action string) bool {
 }
 
 func (ps *PlayerState) ResetAllowedActions() {
-	ps.AllowedActions = []string{}
+	ps.AllowedActions = make([]*Action, 0)
+}
+
+func (ps *PlayerState) AllowAction(a *Action) {
+	ps.AllowedActions = append(ps.AllowedActions, a)
+}
+
+func (ps *PlayerState) AllowActions(actions []*Action) {
+	for _, a := range actions {
+		ps.AllowedActions = append(ps.AllowedActions, a)
+	}
 }

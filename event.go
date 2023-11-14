@@ -15,7 +15,7 @@ const (
 	GameEvent_PlayerSelected
 	GameEvent_Chow
 	GameEvent_Pung
-	GameEvent_DiscardActions
+	GameEvent_Cancel
 	GameEvent_Kong
 	GameEvent_ConcealedKong
 	GameEvent_NormalState
@@ -44,7 +44,7 @@ var GameEventSymbols = map[GameEvent]string{
 	GameEvent_PlayerSelected:             "PlayerSelected",
 	GameEvent_Chow:                       "Chow",
 	GameEvent_Pung:                       "Pung",
-	GameEvent_DiscardActions:             "DiscardActions",
+	GameEvent_Cancel:                     "Cancel",
 	GameEvent_Kong:                       "Kong",
 	GameEvent_ConcealedKong:              "ConcealedKong",
 	GameEvent_NormalState:                "NormalState",
@@ -71,7 +71,7 @@ var GameEventBySymbol = map[string]GameEvent{
 	"PlayerSelected":             GameEvent_PlayerSelected,
 	"Chow":                       GameEvent_Chow,
 	"Pung":                       GameEvent_Pung,
-	"DiscardActions":             GameEvent_DiscardActions,
+	"Cancel":                     GameEvent_Cancel,
 	"Kong":                       GameEvent_Kong,
 	"ConcealedKong":              GameEvent_ConcealedKong,
 	"NormalState":                GameEvent_NormalState,
@@ -108,8 +108,8 @@ func (g *Game) triggerEvent(ge GameEvent, payload interface{}) error {
 		return g.onChow(payload)
 	case GameEvent_Pung:
 		return g.onPung(payload)
-	case GameEvent_DiscardActions:
-		return g.onDiscardActions(payload)
+	case GameEvent_Cancel:
+		return g.onCancel(payload)
 	case GameEvent_Kong:
 		return g.onKong(payload)
 	case GameEvent_ConcealedKong:
@@ -175,7 +175,7 @@ func (g *Game) onPung(payload interface{}) error {
 	return g.WaitForPlayerToDiscardTile()
 }
 
-func (g *Game) onDiscardActions(payload interface{}) error {
+func (g *Game) onCancel(payload interface{}) error {
 	return g.WaitForPlayerToDiscardTile()
 }
 

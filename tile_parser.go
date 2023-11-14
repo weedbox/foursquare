@@ -36,6 +36,17 @@ func AggregateTiles(tiles []string) []string {
 	return grouped
 }
 
+func ContainsTile(tiles []string, str string) bool {
+
+	for _, v := range tiles {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
+}
+
 func CountSpecificTile(tiles []string, tile string) int {
 
 	count := 0

@@ -245,7 +245,10 @@ func (g *Game) WaitForPlayerToDiscardTile() error {
 
 	// Preparing allowed actions for player
 	ps := g.GetCurrentPlayer()
-	ps.AllowedActions = []string{"discard"}
+	ps.ResetAllowedActions()
+	ps.AllowAction(&Action{
+		Name: "discard",
+	})
 
 	return g.triggerEvent(GameEvent_WaitForPlayerToDiscardTile, nil)
 }
@@ -253,17 +256,55 @@ func (g *Game) WaitForPlayerToDiscardTile() error {
 func (g *Game) WaitForPlayerAction() error {
 
 	ps := g.GetCurrentPlayer()
+	ps.ResetAllowedActions()
 
-	// Preparing allowed actions for player
+	// Figure out actions
 	actions := ps.Hand.FigureActions()
-	if len(actions) > 0 {
-		return g.triggerEvent(GameEvent_DiscardActions, nil)
+	if len(actions) == 0 {
+
+		// No Actions
+		return g.triggerEvent(GameEvent_Cancel, nil)
 	}
+
+	// Assign allowed actions for player
+	ps.AllowActions(actions)
 
 	return g.triggerEvent(GameEvent_WaitForPlayerAction, nil)
 }
 
 func (g *Game) WaitForReaction() error {
-	//TODO: Preparing allowed actions for the rest of players
+
+	discardedTile := g.gs.Status.DiscardArea[len(g.gs.Status.DiscardArea)-1]
+
+	ps := g.GetCurrentPlayer()
+
+	var players []*PlayerState
+	cur := ps.Idx
+	for i := 0; i < len(g.gs.Players); i++ {
+
+		if cur >= len(g.gs.Players) {
+			cur = 0
+		}
+
+		p := g.GetPlayer(cur)
+		players = append(players, p)
+
+		cur++
+	}
+
+	// Figure out reactions that player can do
+	for i, p := range players {
+
+		p.ResetAllowedActions()
+
+		if p.Idx == ps.Idx {
+			continue
+		}
+
+		// Assign allowed actions for player
+		actions := p.Hand.FigureReactions(discardedTile, i)
+		p.AllowActions(actions)
+	}
+
 	return g.triggerEvent(GameEvent_WaitForReaction, nil)
 }
