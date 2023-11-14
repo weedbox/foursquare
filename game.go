@@ -87,22 +87,6 @@ func (g *Game) StartAtBanker() error {
 	return g.triggerEvent(GameEvent_PlayerSelected, nil)
 }
 
-func (g *Game) CheckPlayerContext(ctx string) error {
-
-	switch ctx {
-	case "chow":
-		return g.triggerEvent(GameEvent_Chow, nil)
-	case "pung":
-		return g.triggerEvent(GameEvent_Kong, nil)
-	case "kong":
-		return g.triggerEvent(GameEvent_Kong, nil)
-	case "win":
-		return g.triggerEvent(GameEvent_Win, nil)
-	}
-
-	return g.triggerEvent(GameEvent_NormalState, nil)
-}
-
 func (g *Game) DrawSupplementTile() error {
 
 	ps := g.GetCurrentPlayer()
@@ -170,9 +154,32 @@ func (g *Game) SelectPlayer(playerIdx int, ctx string) error {
 	return g.triggerEvent(GameEvent_PlayerSelected, ctx)
 }
 
-func (g *Game) React(playerIdx int, reaction string) error {
+func (g *Game) Act(action string) error {
 
-	// No any reactions
+	ps := g.GetCurrentPlayer()
+
+	if !ps.IsAllowedAction(action) {
+		return ErrInvalidAction
+	}
+
+	switch action {
+	case "win":
+		return g.triggerEvent(GameEvent_Win, ps.Hand.Draw[0])
+	case "kong":
+		err := ps.Hand.DoKong(ps.Hand.Draw[0], true)
+		if err != nil {
+			return err
+		}
+
+		return g.triggerEvent(GameEvent_ConcealedKong, nil)
+	}
+
+	return g.triggerEvent(GameEvent_Cancel, nil)
+}
+
+func (g *Game) React(playerIdx int, reaction string, selectedTiles []string) error {
+
+	// No one has any reactions
 	if playerIdx == -1 {
 		return g.triggerEvent(GameEvent_NoReactions, nil)
 	}
@@ -187,13 +194,48 @@ func (g *Game) React(playerIdx int, reaction string) error {
 		return ErrInvalidReaction
 	}
 
+	g.gs.Status.CurrentPlayer = playerIdx
+
 	// Reset allowed actions
 	ps.ResetAllowedActions()
 
-	return g.triggerEvent(GameEvent_PlayerReacted, &PlayerReacted{
-		PlayerIdx: playerIdx,
-		Reaction:  reaction,
-	})
+	// Take the last discarded tile
+	discardedTile := g.gs.Status.DiscardArea[len(g.gs.Status.DiscardArea)-1]
+	g.gs.Status.DiscardArea = g.gs.Status.DiscardArea[:len(g.gs.Status.DiscardArea)-1]
+
+	// do reaction
+	switch reaction {
+	case "win":
+		return g.triggerEvent(GameEvent_Win, discardedTile)
+	case "kong":
+
+		err := ps.Hand.DoKong(discardedTile, false)
+		if err != nil {
+			return err
+		}
+
+		return g.triggerEvent(GameEvent_Kong, discardedTile)
+
+	case "pung":
+
+		err := ps.Hand.DoPung(discardedTile)
+		if err != nil {
+			return err
+		}
+
+		return g.triggerEvent(GameEvent_Pung, discardedTile)
+
+	case "chow":
+
+		err := ps.Hand.DoChow(discardedTile, selectedTiles)
+		if err != nil {
+			return err
+		}
+
+		return g.triggerEvent(GameEvent_Chow, discardedTile)
+	}
+
+	return g.triggerEvent(GameEvent_NoReactions, nil)
 }
 
 func (g *Game) DiscardTile(tile string, isReadyHand bool) error {

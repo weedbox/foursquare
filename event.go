@@ -18,12 +18,10 @@ const (
 	GameEvent_Cancel
 	GameEvent_Kong
 	GameEvent_ConcealedKong
-	GameEvent_NormalState
 	GameEvent_Drawn
 	GameEvent_FlowerTileDrawn
 	GameEvent_TileDiscarded
 	GameEvent_NoReactions
-	GameEvent_PlayerReacted
 	GameEvent_NoMoreTiles
 	GameEvent_GameDrawn
 	GameEvent_Win
@@ -47,12 +45,10 @@ var GameEventSymbols = map[GameEvent]string{
 	GameEvent_Cancel:                     "Cancel",
 	GameEvent_Kong:                       "Kong",
 	GameEvent_ConcealedKong:              "ConcealedKong",
-	GameEvent_NormalState:                "NormalState",
 	GameEvent_Drawn:                      "Drawn",
 	GameEvent_FlowerTileDrawn:            "FlowerTileDrawn",
 	GameEvent_TileDiscarded:              "TileDiscarded",
 	GameEvent_NoReactions:                "NoReactions",
-	GameEvent_PlayerReacted:              "PlayerReacted",
 	GameEvent_NoMoreTiles:                "NoMoreTiles",
 	GameEvent_GameDrawn:                  "GameDrawn",
 	GameEvent_Win:                        "Win",
@@ -74,12 +70,10 @@ var GameEventBySymbol = map[string]GameEvent{
 	"Cancel":                     GameEvent_Cancel,
 	"Kong":                       GameEvent_Kong,
 	"ConcealedKong":              GameEvent_ConcealedKong,
-	"NormalState":                GameEvent_NormalState,
 	"Drawn":                      GameEvent_Drawn,
 	"FlowerTileDrawn":            GameEvent_FlowerTileDrawn,
 	"TileDiscarded":              GameEvent_TileDiscarded,
 	"NoReactions":                GameEvent_NoReactions,
-	"PlayerReacted":              GameEvent_PlayerReacted,
 	"NoMoreTiles":                GameEvent_NoMoreTiles,
 	"GameDrawn":                  GameEvent_GameDrawn,
 	"Win":                        GameEvent_Win,
@@ -114,8 +108,6 @@ func (g *Game) triggerEvent(ge GameEvent, payload interface{}) error {
 		return g.onKong(payload)
 	case GameEvent_ConcealedKong:
 		return g.onConcealedKong(payload)
-	case GameEvent_NormalState:
-		return g.onNormalState(payload)
 	case GameEvent_Drawn:
 		return g.onDrawn(payload)
 	case GameEvent_FlowerTileDrawn:
@@ -124,8 +116,6 @@ func (g *Game) triggerEvent(ge GameEvent, payload interface{}) error {
 		return g.onTileDiscarded(payload)
 	case GameEvent_NoReactions:
 		return g.onNoReactions(payload)
-	case GameEvent_PlayerReacted:
-		return g.onPlayerReacted(payload)
 	case GameEvent_NoMoreTiles:
 		return g.onNoMoreTiles(payload)
 	case GameEvent_GameDrawn:
@@ -157,14 +147,8 @@ func (g *Game) onAllPlayersReady(payload interface{}) error {
 	return g.StartAtBanker()
 }
 
-// ctx: normal, chow, pung, kong, win
-func (g *Game) onPlayerSelected(ctx interface{}) error {
-
-	if ctx == nil {
-		return g.CheckPlayerContext("normal")
-	}
-
-	return g.CheckPlayerContext(ctx.(string))
+func (g *Game) onPlayerSelected(payload interface{}) error {
+	return g.Draw()
 }
 
 func (g *Game) onChow(payload interface{}) error {
@@ -187,10 +171,6 @@ func (g *Game) onConcealedKong(payload interface{}) error {
 	return g.DrawSupplementTile()
 }
 
-func (g *Game) onNormalState(payload interface{}) error {
-	return g.Draw()
-}
-
 func (g *Game) onDrawn(payload interface{}) error {
 	return g.WaitForPlayerAction()
 }
@@ -205,17 +185,6 @@ func (g *Game) onTileDiscarded(tile interface{}) error {
 
 func (g *Game) onNoReactions(payload interface{}) error {
 	return g.NextPlayer()
-}
-
-func (g *Game) onPlayerReacted(payload interface{}) error {
-
-	if payload == nil {
-		return ErrInvalidEventPayload
-	}
-
-	p := payload.(*PlayerReacted)
-
-	return g.SelectPlayer(p.PlayerIdx, p.Reaction)
 }
 
 func (g *Game) onNoMoreTiles(payload interface{}) error {

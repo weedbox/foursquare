@@ -2,6 +2,7 @@ package foursquare
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 )
 
@@ -61,16 +62,78 @@ func (h *Hand) Discard(tile string) bool {
 	return false
 }
 
-func (h *Hand) DiscardDrawTile() bool {
+func (h *Hand) DiscardDrawTile() {
 
 	for i, t := range h.Tiles {
 		if t == h.Draw[0] {
 			h.Tiles = append(h.Tiles[:i], h.Tiles[i+1:]...)
-			return true
+			h.Draw = []string{}
+			break
+		}
+	}
+}
+
+func (h *Hand) DoChow(tile string, selectedTiles []string) error {
+
+	if tile == "" || len(selectedTiles) != 2 {
+		return ErrInvalidAction
+	}
+
+	for _, t := range selectedTiles {
+		if !ContainsTile(h.Tiles, t) {
+			return ErrInvalidAction
 		}
 	}
 
-	return false
+	RemoveTiles(h.Tiles, selectedTiles)
+
+	s := append(selectedTiles, tile)
+	sort.Strings(s)
+
+	h.Straight = append(h.Straight, s)
+
+	return nil
+}
+
+func (h *Hand) DoPung(tile string) error {
+
+	if tile == "" {
+		return ErrInvalidAction
+	}
+
+	if CountSpecificTile(h.Tiles, tile) != 2 {
+		return ErrInvalidAction
+	}
+
+	RemoveTiles(h.Tiles, []string{tile, tile})
+
+	h.Triplet = append(h.Triplet, tile)
+
+	return nil
+}
+
+func (h *Hand) DoKong(tile string, isConcealed bool) error {
+
+	if tile == "" {
+		return ErrInvalidAction
+	}
+
+	if CountSpecificTile(h.Tiles, tile) != 3 {
+		return ErrInvalidAction
+	}
+
+	if isConcealed {
+		if h.Draw[0] != tile {
+			return ErrInvalidAction
+		}
+	}
+
+	RemoveTiles(h.Tiles, []string{tile, tile, tile})
+
+	h.Kong.Concealed = append(h.Kong.Concealed, tile)
+	h.Draw = []string{}
+
+	return nil
 }
 
 func (h *Hand) FigureStraightCandidate(tile string) [][]string {
