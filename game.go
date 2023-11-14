@@ -251,7 +251,15 @@ func (g *Game) WaitForPlayerToDiscardTile() error {
 }
 
 func (g *Game) WaitForPlayerAction() error {
-	//TODO: Preparing allowed actions for player
+
+	ps := g.GetCurrentPlayer()
+
+	// Preparing allowed actions for player
+	actions := ps.Hand.FigureActions()
+	if len(actions) > 0 {
+		return g.triggerEvent(GameEvent_DiscardActions, nil)
+	}
+
 	return g.triggerEvent(GameEvent_WaitForPlayerAction, nil)
 }
 

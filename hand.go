@@ -67,3 +67,29 @@ func (h *Hand) DiscardDrawTile() bool {
 
 	return false
 }
+
+func (h *Hand) FigureActions() []string {
+
+	var actions []string
+
+	// Win by self draw
+	isWin := CheckWinningTiles(h.Tiles, true, &ResolverRules{
+		Triplet:  true,
+		Straight: true,
+	})
+
+	if isWin {
+		actions = append(actions, "win")
+	}
+
+	// Concealed kong
+	if CountSpecificTile(h.Tiles, h.Draw[0]) == 4 {
+		actions = append(actions, "kong")
+	}
+
+	if len(actions) > 0 {
+		actions = append(actions, "discard")
+	}
+
+	return actions
+}
