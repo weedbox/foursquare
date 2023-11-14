@@ -82,6 +82,10 @@ func (g *Game) InitializeGame() error {
 	return g.triggerEvent(GameEvent_GameInitialized, nil)
 }
 
+func (g *Game) Ready() error {
+	return g.triggerEvent(GameEvent_Ready, nil)
+}
+
 func (g *Game) StartAtBanker() error {
 	g.gs.Status.CurrentPlayer = 0
 	return g.triggerEvent(GameEvent_PlayerSelected, nil)
@@ -279,8 +283,8 @@ func (g *Game) CloseGame() error {
 }
 
 // Wait for external input
-func (g *Game) WaitForAllPlayersReady() error {
-	return g.triggerEvent(GameEvent_WaitForAllPlayersReady, nil)
+func (g *Game) WaitForReady() error {
+	return g.triggerEvent(GameEvent_WaitForReady, nil)
 }
 
 func (g *Game) WaitForPlayerToDiscardTile() error {

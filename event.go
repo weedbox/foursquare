@@ -11,7 +11,7 @@ type GameEvent int32
 const (
 	GameEvent_GameStarted GameEvent = iota
 	GameEvent_GameInitialized
-	GameEvent_AllPlayersReady
+	GameEvent_Ready
 	GameEvent_PlayerSelected
 	GameEvent_Chow
 	GameEvent_Pung
@@ -29,7 +29,7 @@ const (
 	GameEvent_GameClosed
 
 	// Events for waiting
-	GameEvent_WaitForAllPlayersReady
+	GameEvent_WaitForReady
 	GameEvent_WaitForPlayerAction
 	GameEvent_WaitForPlayerToDiscardTile
 	GameEvent_WaitForReaction
@@ -38,7 +38,7 @@ const (
 var GameEventSymbols = map[GameEvent]string{
 	GameEvent_GameStarted:                "GameStarted",
 	GameEvent_GameInitialized:            "GameInitialized",
-	GameEvent_AllPlayersReady:            "AllPlayersReady",
+	GameEvent_Ready:                      "Ready",
 	GameEvent_PlayerSelected:             "PlayerSelected",
 	GameEvent_Chow:                       "Chow",
 	GameEvent_Pung:                       "Pung",
@@ -54,7 +54,7 @@ var GameEventSymbols = map[GameEvent]string{
 	GameEvent_Win:                        "Win",
 	GameEvent_Settlement:                 "Settlement",
 	GameEvent_GameClosed:                 "GameClosed",
-	GameEvent_WaitForAllPlayersReady:     "WaitForAllPlayersReady",
+	GameEvent_WaitForReady:               "WaitForReady",
 	GameEvent_WaitForPlayerAction:        "WaitForPlayerAction",
 	GameEvent_WaitForPlayerToDiscardTile: "WaitForPlayerToDiscardTile",
 	GameEvent_WaitForReaction:            "WaitForReaction",
@@ -63,7 +63,7 @@ var GameEventSymbols = map[GameEvent]string{
 var GameEventBySymbol = map[string]GameEvent{
 	"GameStarted":                GameEvent_GameStarted,
 	"GameInitialized":            GameEvent_GameInitialized,
-	"AllPlayersReady":            GameEvent_AllPlayersReady,
+	"Ready":                      GameEvent_Ready,
 	"PlayerSelected":             GameEvent_PlayerSelected,
 	"Chow":                       GameEvent_Chow,
 	"Pung":                       GameEvent_Pung,
@@ -79,7 +79,7 @@ var GameEventBySymbol = map[string]GameEvent{
 	"Win":                        GameEvent_Win,
 	"Settlement":                 GameEvent_Settlement,
 	"GameClosed":                 GameEvent_GameClosed,
-	"WaitForAllPlayersReady":     GameEvent_WaitForAllPlayersReady,
+	"WaitForReady":               GameEvent_WaitForReady,
 	"WaitForPlayerAction":        GameEvent_WaitForPlayerAction,
 	"WaitForPlayerToDiscardTile": GameEvent_WaitForPlayerToDiscardTile,
 	"WaitForReaction":            GameEvent_WaitForReaction,
@@ -94,8 +94,8 @@ func (g *Game) triggerEvent(ge GameEvent, payload interface{}) error {
 		return g.onGameStarted(payload)
 	case GameEvent_GameInitialized:
 		return g.onGameInitialized(payload)
-	case GameEvent_AllPlayersReady:
-		return g.onAllPlayersReady(payload)
+	case GameEvent_Ready:
+		return g.onReady(payload)
 	case GameEvent_PlayerSelected:
 		return g.onPlayerSelected(payload)
 	case GameEvent_Chow:
@@ -126,7 +126,7 @@ func (g *Game) triggerEvent(ge GameEvent, payload interface{}) error {
 		return g.onSettlement(payload)
 
 	// Wait
-	case GameEvent_WaitForAllPlayersReady:
+	case GameEvent_WaitForReady:
 	case GameEvent_WaitForPlayerAction:
 	case GameEvent_WaitForPlayerToDiscardTile:
 	case GameEvent_WaitForReaction:
@@ -140,10 +140,10 @@ func (g *Game) onGameStarted(payload interface{}) error {
 }
 
 func (g *Game) onGameInitialized(payload interface{}) error {
-	return g.WaitForAllPlayersReady()
+	return g.WaitForReady()
 }
 
-func (g *Game) onAllPlayersReady(payload interface{}) error {
+func (g *Game) onReady(payload interface{}) error {
 	return g.StartAtBanker()
 }
 
