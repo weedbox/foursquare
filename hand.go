@@ -55,22 +55,12 @@ func (h *Hand) Discard(tile string) bool {
 	for i, t := range h.Tiles {
 		if t == tile {
 			h.Tiles = append(h.Tiles[:i], h.Tiles[i+1:]...)
+			h.Draw = []string{}
 			return true
 		}
 	}
 
 	return false
-}
-
-func (h *Hand) DiscardDrawTile() {
-
-	for i, t := range h.Tiles {
-		if t == h.Draw[0] {
-			h.Tiles = append(h.Tiles[:i], h.Tiles[i+1:]...)
-			h.Draw = []string{}
-			break
-		}
-	}
 }
 
 func (h *Hand) DoChow(tile string, selectedTiles []string) error {

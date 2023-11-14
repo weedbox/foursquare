@@ -254,7 +254,9 @@ func (g *Game) DiscardTile(tile string, isReadyHand bool) error {
 	}
 
 	if ps.IsReadyHand {
-		ps.Hand.DiscardDrawTile()
+		if !ps.Hand.Discard(ps.Hand.Draw[0]) {
+			return ErrPlayerHasNoSuchTile
+		}
 	} else {
 
 		if !ps.Hand.Discard(tile) {
