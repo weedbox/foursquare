@@ -54,3 +54,16 @@ func Test_Game_InitializeGame_WithFlowerTiles(t *testing.T) {
 		}
 	}
 }
+
+func Test_Game_WaitForReady(t *testing.T) {
+
+	opts := NewOptions()
+	opts.Dices = RollDices()
+	opts.Tiles = NewTileSet(StandardSetOfTiles)
+
+	g := NewGame(opts)
+
+	g.WaitForReady()
+
+	assert.Equal(t, g.gs.Status.CurrentEvent, GetGameEventSymbols(GameEvent_WaitForReady))
+}

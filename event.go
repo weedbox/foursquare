@@ -85,6 +85,10 @@ var GameEventBySymbol = map[string]GameEvent{
 	"WaitForReaction":            GameEvent_WaitForReaction,
 }
 
+func GetGameEventSymbols(ge GameEvent) string {
+	return GameEventSymbols[ge]
+}
+
 func (g *Game) triggerEvent(ge GameEvent, payload interface{}) error {
 
 	g.gs.Status.CurrentEvent = GameEventSymbols[ge]
