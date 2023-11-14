@@ -113,6 +113,8 @@ func (g *Game) initializePlayers() {
 			Idx: i,
 		}
 
+		ps.ResetAllowedActions()
+
 		if i == 0 {
 			ps.IsBanker = true
 		}

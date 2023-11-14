@@ -79,13 +79,12 @@ func (h *Hand) DoChow(tile string, selectedTiles []string) error {
 		return ErrInvalidAction
 	}
 
-	for _, t := range selectedTiles {
-		if !ContainsTile(h.Tiles, t) {
-			return ErrInvalidAction
-		}
+	newTiles, n := RemoveTiles(h.Tiles, selectedTiles)
+	if n != len(selectedTiles) {
+		return ErrInvalidAction
 	}
 
-	RemoveTiles(h.Tiles, selectedTiles)
+	h.Tiles = newTiles
 
 	s := append(selectedTiles, tile)
 	sort.Strings(s)
@@ -101,11 +100,12 @@ func (h *Hand) DoPung(tile string) error {
 		return ErrInvalidAction
 	}
 
-	if CountSpecificTile(h.Tiles, tile) != 2 {
+	newTiles, n := RemoveTiles(h.Tiles, []string{tile, tile})
+	if n != 2 {
 		return ErrInvalidAction
 	}
 
-	RemoveTiles(h.Tiles, []string{tile, tile})
+	h.Tiles = newTiles
 
 	h.Triplet = append(h.Triplet, tile)
 
@@ -118,19 +118,23 @@ func (h *Hand) DoKong(tile string, isConcealed bool) error {
 		return ErrInvalidAction
 	}
 
-	if CountSpecificTile(h.Tiles, tile) != 3 {
+	newTiles, n := RemoveTiles(h.Tiles, []string{tile, tile, tile})
+	if n != 3 {
 		return ErrInvalidAction
 	}
+
+	h.Tiles = newTiles
 
 	if isConcealed {
 		if h.Draw[0] != tile {
 			return ErrInvalidAction
 		}
+
+		h.Kong.Concealed = append(h.Kong.Concealed, tile)
+	} else {
+		h.Kong.Open = append(h.Kong.Open, tile)
 	}
 
-	RemoveTiles(h.Tiles, []string{tile, tile, tile})
-
-	h.Kong.Concealed = append(h.Kong.Concealed, tile)
 	h.Draw = []string{}
 
 	return nil

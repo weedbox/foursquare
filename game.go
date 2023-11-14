@@ -1,7 +1,9 @@
 package foursquare
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,6 +16,7 @@ var (
 	ErrInvalidPlayer             = errors.New("game: invalid player")
 	ErrInvalidReaction           = errors.New("game: invalid reaction")
 	ErrInvalidAction             = errors.New("game: invalid action")
+	ErrInvalidGameStatus         = errors.New("game: invalid game status")
 )
 
 type Game struct {
@@ -51,7 +54,7 @@ func (g *Game) GetPlayer(playerIdx int) *PlayerState {
 		return nil
 	}
 
-	return &g.gs.Players[g.gs.Status.CurrentPlayer]
+	return &g.gs.Players[playerIdx]
 }
 
 func (g *Game) StartGame() error {
@@ -333,12 +336,17 @@ func (g *Game) WaitForReaction() error {
 		}
 
 		p := g.GetPlayer(cur)
+		if p == nil {
+			return ErrInvalidGameStatus
+		}
+
 		players = append(players, p)
 
 		cur++
 	}
 
 	// Figure out reactions that player can do
+	hasReactors := false
 	for i, p := range players {
 
 		p.ResetAllowedActions()
@@ -349,8 +357,24 @@ func (g *Game) WaitForReaction() error {
 
 		// Assign allowed actions for player
 		actions := p.Hand.FigureReactions(discardedTile, i)
-		p.AllowActions(actions)
+		if len(actions) > 0 {
+			hasReactors = true
+			p.AllowActions(actions)
+		}
 	}
 
-	return g.triggerEvent(GameEvent_WaitForReaction, nil)
+	if hasReactors {
+		return g.triggerEvent(GameEvent_WaitForReaction, nil)
+	}
+
+	return g.triggerEvent(GameEvent_NoReactions, nil)
+}
+
+func (g *Game) GetState() *GameState {
+	return g.gs
+}
+
+func (g *Game) PrintState() {
+	data, _ := json.Marshal(g.gs)
+	fmt.Println(string(data))
 }

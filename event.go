@@ -184,7 +184,7 @@ func (g *Game) onFlowerTileDrawn(payload interface{}) error {
 }
 
 func (g *Game) onTileDiscarded(tile interface{}) error {
-	return g.WaitForPlayerAction()
+	return g.WaitForReaction()
 }
 
 func (g *Game) onNoReactions(payload interface{}) error {
