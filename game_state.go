@@ -13,6 +13,7 @@ type Meta struct {
 	TileSetDef    *TilesOptions `json:"tileset_def"`
 	HandTileCount int           `json:"handtile_count"`
 	PlayerCount   int           `json:"player_count"`
+	WinningStreak int           `json:"winning_streak"`
 	Dices         []int         `json:"dices"`
 	Tiles         []string      `json:"tiles"`
 }

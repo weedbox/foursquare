@@ -34,6 +34,7 @@ func NewGame(opts *Options) *Game {
 	g.gs.Meta.HandTileCount = opts.HandTileCount
 	g.gs.Meta.Dices = opts.Dices
 	g.gs.Meta.PlayerCount = opts.PlayerCount
+	g.gs.Meta.WinningStreak = opts.WinningStreak
 	g.gs.Meta.Tiles = opts.Tiles
 
 	return g
