@@ -10,10 +10,11 @@ type GameState struct {
 }
 
 type Meta struct {
-	HandTileCount int      `json:"handtile_count"`
-	PlayerCount   int      `json:"player_count"`
-	Dices         []int    `json:"dices"`
-	Tiles         []string `json:"tiles"`
+	TileSetDef    *TilesOptions `json:"tileset_def"`
+	HandTileCount int           `json:"handtile_count"`
+	PlayerCount   int           `json:"player_count"`
+	Dices         []int         `json:"dices"`
+	Tiles         []string      `json:"tiles"`
 }
 
 type PlayerState struct {

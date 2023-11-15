@@ -19,19 +19,19 @@ const (
 )
 
 type TileDef struct {
-	Suit    TileSuit
-	Numbers int
-	Count   int
+	Suit    TileSuit `json:"suit"`
+	Numbers int      `json:"numbers"`
+	Count   int      `json:"count"`
 }
 
 type TilesOptions struct {
-	Wan    TileDef // 萬
-	Tong   TileDef // 筒
-	Bamboo TileDef // 條
-	Wind   TileDef // 東南西北
-	Dragon TileDef // 中發白
-	Flower TileDef // 梅蘭竹菊
-	Season TileDef // 春夏秋冬
+	Wan    TileDef `json:"wan"`    // 萬
+	Tong   TileDef `json:"tong"`   // 筒
+	Bamboo TileDef `json:"bamboo"` // 條
+	Wind   TileDef `json:"wind"`   // 東南西北
+	Dragon TileDef `json:"dragon"` // 中發白
+	Flower TileDef `json:"flower"` // 梅蘭竹菊
+	Season TileDef `json:"season"` // 春夏秋冬
 }
 
 var StandardSetOfTiles = &TilesOptions{

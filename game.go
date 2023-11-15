@@ -30,6 +30,7 @@ func NewGame(opts *Options) *Game {
 	}
 
 	// Apply options
+	g.gs.Meta.TileSetDef = opts.TileSetDef
 	g.gs.Meta.HandTileCount = opts.HandTileCount
 	g.gs.Meta.Dices = opts.Dices
 	g.gs.Meta.PlayerCount = opts.PlayerCount
@@ -245,7 +246,7 @@ func (g *Game) React(playerIdx int, reaction string, selectedTiles []string) err
 	return g.triggerEvent(GameEvent_NoReactions, nil)
 }
 
-func (g *Game) DiscardTile(tile string, isReadyHand bool) error {
+func (g *Game) DiscardTile(tile string) error {
 
 	ps := g.GetCurrentPlayer()
 
@@ -253,20 +254,28 @@ func (g *Game) DiscardTile(tile string, isReadyHand bool) error {
 		return ErrInvalidAction
 	}
 
-	if ps.IsReadyHand {
-		if !ps.Hand.Discard(ps.Hand.Draw[0]) {
-			return ErrPlayerHasNoSuchTile
-		}
-	} else {
-
-		if !ps.Hand.Discard(tile) {
-			return ErrPlayerHasNoSuchTile
-		}
-
-		if isReadyHand {
-			ps.IsReadyHand = true
-		}
+	if !ps.Hand.Discard(tile) {
+		return ErrPlayerHasNoSuchTile
 	}
+
+	g.gs.Status.DiscardArea = append(g.gs.Status.DiscardArea, tile)
+
+	return g.triggerEvent(GameEvent_TileDiscarded, nil)
+}
+
+func (g *Game) ReadyHand(tile string) error {
+
+	ps := g.GetCurrentPlayer()
+
+	if !ps.IsAllowedAction("readyhand") {
+		return ErrInvalidAction
+	}
+
+	if !ps.Hand.Discard(tile) {
+		return ErrPlayerHasNoSuchTile
+	}
+
+	ps.IsReadyHand = true
 
 	g.gs.Status.DiscardArea = append(g.gs.Status.DiscardArea, tile)
 
@@ -297,8 +306,19 @@ func (g *Game) WaitForPlayerToDiscardTile() error {
 	// Preparing allowed actions for player
 	ps := g.GetCurrentPlayer()
 	ps.ResetAllowedActions()
+
+	// Discard tile directly if player stay in ready hand condition
+	if ps.IsReadyHand {
+		return g.DiscardTile(ps.Hand.Draw[0])
+	}
+
 	ps.AllowAction(&Action{
 		Name: "discard",
+	})
+
+	//TODO: check if it has readyhand condition
+	ps.AllowAction(&Action{
+		Name: "readyhand",
 	})
 
 	return g.triggerEvent(GameEvent_WaitForPlayerToDiscardTile, nil)

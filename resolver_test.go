@@ -110,7 +110,11 @@ func Test_Resolver_FigureReadyHandConditions(t *testing.T) {
 		},
 	}
 
-	r := NewResolver(StandardSetOfTiles)
+	opts := NewOptions()
+	opts.Dices = RollDices()
+	opts.Tiles = NewTileSet(StandardSetOfTiles)
+
+	g := NewGame(opts)
 
 	rules := &ResolverRules{
 		Triplet:  true,
@@ -118,7 +122,7 @@ func Test_Resolver_FigureReadyHandConditions(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		isReadyHand, candidates := r.figureReadyHandConditions(TileSuitWan, c.Tiles, rules)
+		isReadyHand, candidates := g.figureReadyHandConditions(TileSuitWan, c.Tiles, rules)
 		assert.Equal(t, c.IsReadyHand, isReadyHand, c.Tiles)
 		assert.ElementsMatch(t, c.Candidates, candidates)
 	}
@@ -147,10 +151,14 @@ func Test_Resolver_Resolve_Win(t *testing.T) {
 		},
 	}
 
-	r := NewResolver(StandardSetOfTiles)
+	opts := NewOptions()
+	opts.Dices = RollDices()
+	opts.Tiles = NewTileSet(StandardSetOfTiles)
+
+	g := NewGame(opts)
 
 	for _, c := range cases {
-		state := r.Resolve(c.Tiles)
+		state := g.Resolve(c.Tiles)
 		assert.Equal(t, c.IsWin, state.IsWin, c.Tiles)
 		assert.Equal(t, c.IsReadyHand, state.IsReadyHand, c.Tiles)
 		assert.ElementsMatch(t, c.Candidates, state.ReadyHandCandidates)
@@ -193,10 +201,14 @@ func Test_Resolver_Resolve_ReadyHand(t *testing.T) {
 		},
 	}
 
-	r := NewResolver(StandardSetOfTiles)
+	opts := NewOptions()
+	opts.Dices = RollDices()
+	opts.Tiles = NewTileSet(StandardSetOfTiles)
+
+	g := NewGame(opts)
 
 	for _, c := range cases {
-		state := r.Resolve(c.Tiles)
+		state := g.Resolve(c.Tiles)
 		assert.Equal(t, c.IsWin, state.IsWin, c.Tiles)
 		assert.Equal(t, c.IsReadyHand, state.IsReadyHand, c.Tiles)
 		assert.ElementsMatch(t, c.Candidates, state.ReadyHandCandidates, c.Tiles)

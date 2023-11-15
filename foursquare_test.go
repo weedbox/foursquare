@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Basic_Workflow(t *testing.T) {
+func Test_Play_Around_In_A_Circle(t *testing.T) {
 
 	opts := NewOptions()
 	opts.Dices = RollDices()
@@ -27,7 +27,7 @@ func Test_Basic_Workflow(t *testing.T) {
 
 	// Dicard tile
 	assert.Equal(t, 17, len(player.Hand.Tiles))
-	assert.Nil(t, g.DiscardTile("W4", false))
+	assert.Nil(t, g.DiscardTile("W4"))
 	assert.False(t, player.Hand.Exists("W4"))
 	assert.Equal(t, 16, len(player.Hand.Tiles))
 	assert.True(t, ContainsTile(g.GetState().Status.DiscardArea, "W4"))
@@ -49,7 +49,7 @@ func Test_Basic_Workflow(t *testing.T) {
 	assert.False(t, ContainsTile(g.GetState().Status.DiscardArea, "W4")) // W4 was removed from discard area
 
 	// Dicard tile
-	assert.Nil(t, g.DiscardTile("W1", false))
+	assert.Nil(t, g.DiscardTile("W1"))
 	assert.False(t, player.Hand.Exists("W1"))
 	assert.Equal(t, 13, len(player.Hand.Tiles))
 	assert.True(t, ContainsTile(g.GetState().Status.DiscardArea, "W1"))
@@ -71,8 +71,8 @@ func Test_Basic_Workflow(t *testing.T) {
 	assert.False(t, ContainsTile(g.GetState().Status.DiscardArea, "W1")) // W1 was removed from discard area
 
 	// Dicard tile
-	assert.NotNil(t, g.DiscardTile("T8", false)) // No such tile
-	assert.Nil(t, g.DiscardTile("T6", false))
+	assert.NotNil(t, g.DiscardTile("T8")) // No such tile
+	assert.Nil(t, g.DiscardTile("T6"))
 	assert.False(t, player.Hand.Exists("T6"))
 	assert.Equal(t, 13, len(player.Hand.Tiles))
 	assert.True(t, ContainsTile(g.GetState().Status.DiscardArea, "T6"))
@@ -87,7 +87,7 @@ func Test_Basic_Workflow(t *testing.T) {
 	assert.True(t, player.Hand.Exists("T8"))
 	assert.True(t, player.IsAllowedAction("discard"))
 	assert.Equal(t, 17, len(player.Hand.Tiles))
-	assert.Nil(t, g.DiscardTile("T8", false))
+	assert.Nil(t, g.DiscardTile("T8"))
 	assert.Equal(t, 0, len(player.Hand.Draw))
 	assert.True(t, ContainsTile(g.GetState().Status.DiscardArea, "T8"))
 
