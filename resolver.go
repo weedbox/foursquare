@@ -12,6 +12,11 @@ type ResolvedState struct {
 	Eyes                []string `json:"eyes"`
 }
 
+type DiscardCandidate struct {
+	DiscardedTile string   `json:"discarded_tile"`
+	TargetTiles   []string `json:"target_tiles"`
+}
+
 var (
 	SuitedTileRule = &ResolverRules{
 		Triplet:  true,
@@ -165,4 +170,29 @@ func (g *Game) Resolve(tiles []string) *ResolvedState {
 	}
 
 	return state
+}
+
+func (g *Game) FigureDiscardCandidatesForReadyHand(tiles []string) []*DiscardCandidate {
+
+	candidates := make([]*DiscardCandidate, 0)
+
+	for i, t := range tiles {
+
+		newTiles := append(tiles[0:i], tiles[i+1:len(tiles)]...)
+
+		// Check if it is ready hand condition
+		state := g.Resolve(newTiles)
+		if !state.IsReadyHand {
+			continue
+		}
+
+		c := &DiscardCandidate{
+			DiscardedTile: t,
+			TargetTiles:   state.ReadyHandCandidates,
+		}
+
+		candidates = append(candidates, c)
+	}
+
+	return candidates
 }

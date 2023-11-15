@@ -316,10 +316,14 @@ func (g *Game) WaitForPlayerToDiscardTile() error {
 		Name: "discard",
 	})
 
-	//TODO: check if it has readyhand condition
-	ps.AllowAction(&Action{
-		Name: "readyhand",
-	})
+	// Figure discard candidates for readyhand condition
+	candidates := g.FigureDiscardCandidatesForReadyHand(ps.Hand.Tiles)
+	if len(candidates) > 0 {
+		ps.AllowAction(&Action{
+			Name:                "readyhand",
+			ReadyHandCandidates: candidates,
+		})
+	}
 
 	return g.triggerEvent(GameEvent_WaitForPlayerToDiscardTile, nil)
 }
