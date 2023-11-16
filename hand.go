@@ -34,6 +34,32 @@ func NewHand() *Hand {
 	}
 }
 
+func (h *Hand) GetAllTiles() []string {
+
+	var tiles []string
+
+	tiles = append(tiles, h.Flowers...)
+	tiles = append(tiles, h.Tiles...)
+
+	for _, triplet := range h.Triplet {
+		tiles = append(tiles, triplet, triplet, triplet)
+	}
+
+	for _, s := range h.Straight {
+		tiles = append(tiles, s...)
+	}
+
+	for _, k := range h.Kong.Open {
+		tiles = append(tiles, k, k, k, k)
+	}
+
+	for _, k := range h.Kong.Concealed {
+		tiles = append(tiles, k, k, k, k)
+	}
+
+	return tiles
+}
+
 func (h *Hand) Deal(tiles []string) {
 	h.Draw = tiles
 	h.Tiles = append(h.Tiles, tiles...)
@@ -188,18 +214,15 @@ func (h *Hand) FigureActions() []*Action {
 	return actions
 }
 
-func (h *Hand) FigureReactions(tile string, relativeSeatIdx int) []*Action {
+func (h *Hand) FigureReactions(tileSetDef *TileSetDef, tile string, relativeSeatIdx int) []*Action {
 
 	var actions []*Action
 
-	// Win
 	tiles := append(h.Tiles, tile)
-	isWin := CheckWinningTiles(tiles, true, &ResolverRules{
-		Triplet:  true,
-		Straight: true,
-	})
 
-	if isWin {
+	// Win
+	state := Resolve(tileSetDef, tiles)
+	if state.IsWin {
 		actions = append(actions, &Action{Name: "win"})
 	}
 

@@ -1,12 +1,14 @@
 package foursquare
 
 type Options struct {
-	TileSetDef    *TilesOptions `json:"tileset_def"`
-	HandTileCount int           `json:"handtile_count"`
-	PlayerCount   int           `json:"player_count"`
-	WinningStreak int           `json:"winning_streak"`
-	Dices         []int         `json:"dices"`
-	Tiles         []string      `json:"tiles"`
+	TileSetDef    *TileSetDef `json:"tileset_def"`
+	HandTileCount int         `json:"handtile_count"`
+	PlayerCount   int         `json:"player_count"`
+	WinningStreak int         `json:"winning_streak"`
+	Dices         []int       `json:"dices"`
+	Tiles         []string    `json:"tiles"`
+
+	InitialHand map[int]*Hand `json:"initial_hand,omitempty"`
 }
 
 func NewOptions() *Options {
@@ -17,5 +19,6 @@ func NewOptions() *Options {
 		WinningStreak: 0,
 		Dices:         make([]int, 0),
 		Tiles:         make([]string, 0),
+		InitialHand:   nil,
 	}
 }

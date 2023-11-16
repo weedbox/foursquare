@@ -20,7 +20,8 @@ var (
 )
 
 type Game struct {
-	gs *GameState
+	initialHand map[int]*Hand
+	gs          *GameState
 }
 
 func NewGame(opts *Options) *Game {
@@ -30,6 +31,7 @@ func NewGame(opts *Options) *Game {
 	}
 
 	// Apply options
+	g.initialHand = opts.InitialHand
 	g.gs.Meta.TileSetDef = opts.TileSetDef
 	g.gs.Meta.HandTileCount = opts.HandTileCount
 	g.gs.Meta.Dices = opts.Dices
@@ -173,6 +175,7 @@ func (g *Game) Act(action string) error {
 
 	switch action {
 	case "win":
+		//TODO: Needs a clearer definition
 		return g.triggerEvent(GameEvent_Win, ps.Hand.Draw[0])
 	case "kong":
 		err := ps.Hand.DoKong(ps.Hand.Draw[0], true)
@@ -318,7 +321,7 @@ func (g *Game) WaitForPlayerToDiscardTile() error {
 	})
 
 	// Figure discard candidates for readyhand condition
-	candidates := g.FigureDiscardCandidatesForReadyHand(ps.Hand.Tiles)
+	candidates := FigureDiscardCandidatesForReadyHand(g.gs.Meta.TileSetDef, ps.Hand.Tiles)
 	if len(candidates) > 0 {
 		ps.AllowAction(&Action{
 			Name:                "readyhand",
@@ -354,22 +357,9 @@ func (g *Game) WaitForReaction() error {
 
 	ps := g.GetCurrentPlayer()
 
-	var players []*PlayerState
-	cur := ps.Idx
-	for i := 0; i < len(g.gs.Players); i++ {
-
-		if cur >= len(g.gs.Players) {
-			cur = 0
-		}
-
-		p := g.GetPlayer(cur)
-		if p == nil {
-			return ErrInvalidGameStatus
-		}
-
-		players = append(players, p)
-
-		cur++
+	players := g.getPlayersStartingFrom(ps.Idx)
+	if len(players) != len(g.gs.Players) {
+		return ErrInvalidGameStatus
 	}
 
 	// Figure out reactions that player can do
@@ -383,7 +373,7 @@ func (g *Game) WaitForReaction() error {
 		}
 
 		// Assign allowed actions for player
-		actions := p.Hand.FigureReactions(discardedTile, i)
+		actions := p.Hand.FigureReactions(g.gs.Meta.TileSetDef, discardedTile, i)
 		if len(actions) > 0 {
 			hasReactors = true
 			p.AllowActions(actions)
@@ -391,6 +381,24 @@ func (g *Game) WaitForReaction() error {
 	}
 
 	if hasReactors {
+
+		// All wins?
+		winCount := 0
+		for _, p := range players {
+			if p.IsAllowedAction("win") {
+				winCount++
+			}
+		}
+
+		// Oops!
+		if winCount == len(players)-1 {
+
+			g.resetAllowedActions()
+
+			//TODO: Needs a clearer definition for payload
+			return g.triggerEvent(GameEvent_Win, nil)
+		}
+
 		return g.triggerEvent(GameEvent_WaitForReaction, nil)
 	}
 

@@ -1,5 +1,35 @@
 package foursquare
 
+func (g *Game) resetAllowedActions() {
+
+	for _, p := range g.gs.Players {
+		p.ResetAllowedActions()
+	}
+}
+
+func (g *Game) getPlayersStartingFrom(idx int) []*PlayerState {
+
+	var players []*PlayerState
+	cur := idx
+	for i := 0; i < len(g.gs.Players); i++ {
+
+		if cur >= len(g.gs.Players) {
+			cur = 0
+		}
+
+		p := g.GetPlayer(cur)
+		if p == nil {
+			continue
+		}
+
+		players = append(players, p)
+
+		cur++
+	}
+
+	return players
+}
+
 func (g *Game) drawTile() (string, []string) {
 
 	var tile string
@@ -73,10 +103,12 @@ func (g *Game) drawSupplementTiles(count int) ([]string, []string) {
 
 func (g *Game) initializeHandTiles() {
 
-	for i := 0; i < g.gs.Meta.HandTileCount; i++ {
+	if g.initialHand == nil {
+		for i := 0; i < g.gs.Meta.HandTileCount; i++ {
 
-		for _, ps := range g.gs.Players {
-			ps.Hand.Tiles = append(ps.Hand.Tiles, g.dealTiles(1)...)
+			for _, ps := range g.gs.Players {
+				ps.Hand.Tiles = append(ps.Hand.Tiles, g.dealTiles(1)...)
+			}
 		}
 	}
 
@@ -119,9 +151,29 @@ func (g *Game) initializePlayers() {
 			ps.IsBanker = true
 		}
 
-		ps.Hand = NewHand()
+		if g.initialHand != nil {
+			ps.Hand = g.initialHand[i]
+		} else {
+			// Empty hand
+			ps.Hand = NewHand()
+		}
 
 		g.gs.Players = append(g.gs.Players, ps)
+	}
+
+	if g.initialHand != nil {
+		var initialTiles []string
+		for _, h := range g.initialHand {
+
+			// Remove tiles from pool
+			tiles := h.GetAllTiles()
+			newTiles, _ := RemoveTiles(g.gs.Meta.Tiles, tiles)
+			g.gs.Meta.Tiles = newTiles
+
+			initialTiles = append(initialTiles, tiles...)
+		}
+
+		g.gs.Meta.Tiles = append(initialTiles, g.gs.Meta.Tiles...)
 	}
 
 	g.initializeHandTiles()

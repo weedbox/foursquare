@@ -24,7 +24,7 @@ type TileDef struct {
 	Count   int      `json:"count"`
 }
 
-type TilesOptions struct {
+type TileSetDef struct {
 	Wan    TileDef `json:"wan"`    // 萬
 	Tong   TileDef `json:"tong"`   // 筒
 	Bamboo TileDef `json:"bamboo"` // 條
@@ -34,7 +34,7 @@ type TilesOptions struct {
 	Season TileDef `json:"season"` // 春夏秋冬
 }
 
-var StandardSetOfTiles = &TilesOptions{
+var StandardSetOfTiles = &TileSetDef{
 	Wan:    TileDef{TileSuitWan, 9, 4},
 	Tong:   TileDef{TileSuitTong, 9, 4},
 	Bamboo: TileDef{TileSuitBamboo, 9, 4},
@@ -60,7 +60,7 @@ func GenTiles(suit TileSuit, numbers int, count int) []string {
 	return tiles
 }
 
-func NewTileSet(opt *TilesOptions) []string {
+func NewTileSet(opt *TileSetDef) []string {
 
 	tiles := make([]string, 0)
 	tiles = append(tiles, GenTiles(opt.Wan.Suit, opt.Wan.Numbers, opt.Wan.Count)...)

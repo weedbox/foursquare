@@ -424,3 +424,51 @@ func ResolveTileSegmentations(tiles []string) [][]string {
 
 	return segments
 }
+
+func FigureReadyHandConditions(tileSetDef *TileSetDef, suit TileSuit, tiles []string, rules *ResolverRules) (bool, []string) {
+
+	var candidates []string
+
+	mod := len(tiles) % 3
+	if mod == 0 {
+		return false, []string{}
+	}
+
+	hasEyes := false
+	if mod == 1 {
+		hasEyes = true
+	}
+
+	var num int
+
+	switch suit {
+	case TileSuitWan:
+		num = tileSetDef.Wan.Numbers
+	case TileSuitTong:
+		num = tileSetDef.Tong.Numbers
+	case TileSuitBamboo:
+		num = tileSetDef.Bamboo.Numbers
+	case TileSuitWind:
+		num = tileSetDef.Wind.Numbers
+	case TileSuitDragon:
+		num = tileSetDef.Dragon.Numbers
+	}
+
+	tries := GenTiles(suit, num, 1)
+
+	for _, t := range tries {
+
+		// Add tile then check it
+		ts := append(tiles, t)
+
+		if CheckWinningTiles(ts, hasEyes, rules) {
+			candidates = append(candidates, t)
+		}
+	}
+
+	if len(candidates) == 0 {
+		return false, candidates
+	}
+
+	return true, candidates
+}
