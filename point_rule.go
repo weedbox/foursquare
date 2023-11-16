@@ -333,11 +333,15 @@ func (pr *PointRule) BigFourWinds(hand *Hand) bool {
 
 	results := CountByTiles(tiles)
 
+	tripletCount := 0
+
 	// 東
 	count, ok := results["I1"]
 	if !ok || count != 3 {
 		return false
 	}
+
+	tripletCount++
 
 	// 南
 	count, ok = results["I2"]
@@ -345,28 +349,26 @@ func (pr *PointRule) BigFourWinds(hand *Hand) bool {
 		return false
 	}
 
+	tripletCount++
+
 	// 西
 	count, ok = results["I3"]
 	if !ok || count != 3 {
 		return false
 	}
 
+	tripletCount++
+
 	// 北
-	count, ok = results["I3"]
+	count, ok = results["I4"]
 	if !ok || count != 3 {
 		return false
 	}
 
+	tripletCount++
+
 	// It should be 4 triplets
-	count = 0
-	for _, c := range results {
-
-		if c == 3 {
-			count++
-		}
-	}
-
-	if count > 4 {
+	if tripletCount > 4 {
 		return false
 	}
 
