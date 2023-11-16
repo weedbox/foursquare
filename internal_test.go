@@ -56,9 +56,6 @@ func Test_Internal_DrawSupplementTiles(t *testing.T) {
 	tileCount := 3
 	tiles, flowerTiles := g.drawSupplementTiles(tileCount)
 
-	t.Log(tiles)
-	t.Log(flowerTiles)
-
 	assert.Equal(t, tileCount, len(tiles))
 	assert.ElementsMatch(t, []string{"W3", "W2", "W1"}, tiles)
 	assert.ElementsMatch(t, []string{"F2", "F1"}, flowerTiles)
