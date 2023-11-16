@@ -1,6 +1,9 @@
 package foursquare
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 var (
 	ErrInvalidEventPayload = errors.New("event: invalid event payload")
@@ -92,6 +95,7 @@ func GetGameEventSymbols(ge GameEvent) string {
 func (g *Game) triggerEvent(ge GameEvent, payload interface{}) error {
 
 	g.gs.Status.CurrentEvent = GameEventSymbols[ge]
+	g.gs.UpdatedAt = time.Now().Unix()
 
 	switch ge {
 	case GameEvent_GameStarted:
