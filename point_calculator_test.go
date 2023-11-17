@@ -111,7 +111,11 @@ func Test_PointCalculator_PungHand(t *testing.T) {
 	pc := NewPointCalculator(StandardRules)
 
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, pc.PungHand(c.Hand), i)
+		if c.Answer {
+			assert.NotZero(t, pc.PungHand(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.PungHand(c.Hand), i)
+		}
 	}
 }
 
@@ -172,7 +176,11 @@ func Test_PointCalculator_FullFlush(t *testing.T) {
 	pc := NewPointCalculator(StandardRules)
 
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, pc.FullFlush(c.Hand), i)
+		if c.Answer {
+			assert.NotZero(t, pc.FullFlush(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.FullFlush(c.Hand), i)
+		}
 	}
 }
 
@@ -235,7 +243,11 @@ func Test_PointCalculator_HalfFlush(t *testing.T) {
 	pc := NewPointCalculator(StandardRules)
 
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, pc.HalfFlush(c.Hand), i)
+		if c.Answer {
+			assert.NotZero(t, pc.HalfFlush(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.HalfFlush(c.Hand), i)
+		}
 	}
 }
 
@@ -264,7 +276,11 @@ func Test_PointCalculator_AllHonorsHand(t *testing.T) {
 	pc := NewPointCalculator(StandardRules)
 
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, pc.AllHonorsHand(c.Hand), i)
+		if c.Answer {
+			assert.NotZero(t, pc.AllHonorsHand(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.AllHonorsHand(c.Hand), i)
+		}
 	}
 }
 
@@ -307,7 +323,11 @@ func Test_PointCalculator_BigThreeDragons(t *testing.T) {
 	pc := NewPointCalculator(StandardRules)
 
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, pc.BigThreeDragons(c.Hand), i)
+		if c.Answer {
+			assert.NotZero(t, pc.BigThreeDragons(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.BigThreeDragons(c.Hand), i)
+		}
 	}
 }
 
@@ -350,7 +370,11 @@ func Test_PointCalculator_BigFourWinds(t *testing.T) {
 	pc := NewPointCalculator(StandardRules)
 
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, pc.BigFourWinds(c.Hand), i)
+		if c.Answer {
+			assert.NotZero(t, pc.BigFourWinds(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.BigFourWinds(c.Hand), i)
+		}
 	}
 }
 
@@ -393,7 +417,11 @@ func Test_PointCalculator_SmallFourWinds(t *testing.T) {
 	pc := NewPointCalculator(StandardRules)
 
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, pc.SmallFourWinds(c.Hand), i)
+		if c.Answer {
+			assert.NotZero(t, pc.SmallFourWinds(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.SmallFourWinds(c.Hand), i)
+		}
 	}
 }
 
@@ -474,7 +502,11 @@ func Test_PointCalculator_ThreeConcealedPungs(t *testing.T) {
 	pc := NewPointCalculator(StandardRules)
 
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, pc.ThreeConcealedPungs(c.Hand), i)
+		if c.Answer {
+			assert.NotZero(t, pc.ThreeConcealedPungs(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.ThreeConcealedPungs(c.Hand), i)
+		}
 	}
 }
 
@@ -555,7 +587,11 @@ func Test_PointCalculator_FourConcealedPungs(t *testing.T) {
 	pc := NewPointCalculator(StandardRules)
 
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, pc.FourConcealedPungs(c.Hand), i)
+		if c.Answer {
+			assert.NotZero(t, pc.FourConcealedPungs(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.FourConcealedPungs(c.Hand), i)
+		}
 	}
 }
 
@@ -614,7 +650,11 @@ func Test_PointCalculator_FiveConcealedPungs(t *testing.T) {
 	pc := NewPointCalculator(StandardRules)
 
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, pc.FiveConcealedPungs(c.Hand), i)
+		if c.Answer {
+			assert.NotZero(t, pc.FiveConcealedPungs(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.FiveConcealedPungs(c.Hand), i)
+		}
 	}
 }
 
@@ -658,6 +698,10 @@ func Test_PointCalculator_LittleThreeDragons(t *testing.T) {
 	pc := NewPointCalculator(StandardRules)
 
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, pc.LittleThreeDragons(c.Hand), i)
+		if c.Answer {
+			assert.NotZero(t, pc.LittleThreeDragons(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.LittleThreeDragons(c.Hand), i)
+		}
 	}
 }

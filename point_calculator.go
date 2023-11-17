@@ -51,17 +51,17 @@ type PointCalculator struct {
 
 var StandardRules map[PointType]PointRule = map[PointType]PointRule{
 	MinimalPoints:       {Type: MinimalPoints, Point: 1},       // 平胡（自摸）
-	PungHand:            {Type: PungHand, Point: 2},            // 碰碰胡
-	HalfFlush:           {Type: HalfFlush, Point: 3},           // 混一色
-	FullFlush:           {Type: FullFlush, Point: 6},           // 清一色
+	PungHand:            {Type: PungHand, Point: 4},            // 碰碰胡
+	HalfFlush:           {Type: HalfFlush, Point: 4},           // 混一色
+	FullFlush:           {Type: FullFlush, Point: 8},           // 清一色
+	AllHonorsHand:       {Type: AllHonorsHand, Point: 8},       // 字一色
 	LittleThreeDragons:  {Type: LittleThreeDragons, Point: 4},  // 小三元
-	AllHonorsHand:       {Type: AllHonorsHand, Point: 5},       // 字一色
 	BigThreeDragons:     {Type: BigThreeDragons, Point: 8},     // 大三元
 	ThreeConcealedPungs: {Type: ThreeConcealedPungs, Point: 2}, // 三暗刻
 	FourConcealedPungs:  {Type: FourConcealedPungs, Point: 5},  // 四暗刻
 	FiveConcealedPungs:  {Type: FiveConcealedPungs, Point: 8},  // 五暗刻
-	SmallFourWinds:      {Type: SmallFourWinds, Point: 10},     // 小四喜
-	BigFourWinds:        {Type: BigFourWinds, Point: 13},       // 大四喜
+	SmallFourWinds:      {Type: SmallFourWinds, Point: 8},      // 小四喜
+	BigFourWinds:        {Type: BigFourWinds, Point: 16},       // 大四喜
 
 	HeavenlyHand: {Type: HeavenlyHand, Point: 16}, // 天胡
 	EarthlyHand:  {Type: EarthlyHand, Point: 16},  // 地胡
@@ -95,12 +95,12 @@ func (pc *PointCalculator) MinimalPoints(hand *Hand) {
 	// 實現判斷平胡（自摸）的邏輯
 }
 
-func (pc *PointCalculator) PungHand(hand *Hand) bool {
+func (pc *PointCalculator) PungHand(hand *Hand) int {
 
 	// 實現判斷碰碰胡的邏輯
 
 	if len(hand.Straight) > 0 || len(hand.Kong.Concealed) > 0 || len(hand.Kong.Open) > 0 {
-		return false
+		return 0
 	}
 
 	results := CountByTiles(hand.Tiles)
@@ -112,7 +112,7 @@ func (pc *PointCalculator) PungHand(hand *Hand) bool {
 
 			// only one pair of eyes
 			if foundEyes {
-				return false
+				return 0
 			}
 
 			foundEyes = true
@@ -120,14 +120,14 @@ func (pc *PointCalculator) PungHand(hand *Hand) bool {
 		}
 
 		if r != 3 {
-			return false
+			return 0
 		}
 	}
 
-	return true
+	return pc.Rules[PungHand].Point
 }
 
-func (pc *PointCalculator) HalfFlush(hand *Hand) bool {
+func (pc *PointCalculator) HalfFlush(hand *Hand) int {
 
 	// 實現判斷混一色的邏輯
 
@@ -143,7 +143,7 @@ func (pc *PointCalculator) HalfFlush(hand *Hand) bool {
 
 	// Dragon, Winds and one suit
 	if len(results) > 3 || len(results) == 1 {
-		return false
+		return 0
 	}
 
 	var foundSuit TileSuit
@@ -153,16 +153,16 @@ func (pc *PointCalculator) HalfFlush(hand *Hand) bool {
 		}
 
 		if len(foundSuit) != 0 {
-			return false
+			return 0
 		}
 
 		foundSuit = suit
 	}
 
-	return true
+	return pc.Rules[HalfFlush].Point
 }
 
-func (pc *PointCalculator) FullFlush(hand *Hand) bool {
+func (pc *PointCalculator) FullFlush(hand *Hand) int {
 
 	// 實現判斷清一色的邏輯
 
@@ -176,20 +176,20 @@ func (pc *PointCalculator) FullFlush(hand *Hand) bool {
 
 	results := CountBySuits(tiles)
 	if len(results) != 1 {
-		return false
+		return 0
 	}
 
 	for suit, _ := range results {
 		// No dragon and wind
 		if suit == TileSuitDragon || suit == TileSuitWind {
-			return false
+			return 0
 		}
 	}
 
-	return true
+	return pc.Rules[FullFlush].Point
 }
 
-func (pc *PointCalculator) LittleThreeDragons(hand *Hand) bool {
+func (pc *PointCalculator) LittleThreeDragons(hand *Hand) int {
 
 	// 實現判斷小三元的邏輯
 
@@ -211,19 +211,19 @@ func (pc *PointCalculator) LittleThreeDragons(hand *Hand) bool {
 			} else if c == 2 {
 				pairDragons++
 			} else {
-				return false
+				return 0
 			}
 		}
 	}
 
 	if tripletDragons != 2 || pairDragons != 1 {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[LittleThreeDragons].Point
 }
 
-func (pc *PointCalculator) AllHonorsHand(hand *Hand) bool {
+func (pc *PointCalculator) AllHonorsHand(hand *Hand) int {
 
 	// 實現判斷字一色的邏輯
 
@@ -234,14 +234,14 @@ func (pc *PointCalculator) AllHonorsHand(hand *Hand) bool {
 	results := CountBySuits(tiles)
 	for suit, _ := range results {
 		if suit != TileSuitDragon && suit != TileSuitWind {
-			return false
+			return 0
 		}
 	}
 
-	return true
+	return pc.Rules[AllHonorsHand].Point
 }
 
-func (pc *PointCalculator) BigThreeDragons(hand *Hand) bool {
+func (pc *PointCalculator) BigThreeDragons(hand *Hand) int {
 
 	// 實現判斷大三元的邏輯
 
@@ -256,25 +256,25 @@ func (pc *PointCalculator) BigThreeDragons(hand *Hand) bool {
 	// 中
 	count, ok := results["D1"]
 	if !ok || count != 3 {
-		return false
+		return 0
 	}
 
 	// 發
 	count, ok = results["D2"]
 	if !ok || count != 3 {
-		return false
+		return 0
 	}
 
 	// 白
 	count, ok = results["D3"]
 	if !ok || count != 3 {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[BigThreeDragons].Point
 }
 
-func (pc *PointCalculator) ThreeConcealedPungs(hand *Hand) bool {
+func (pc *PointCalculator) ThreeConcealedPungs(hand *Hand) int {
 
 	// 實現判斷三暗刻的邏輯
 
@@ -290,13 +290,13 @@ func (pc *PointCalculator) ThreeConcealedPungs(hand *Hand) bool {
 	}
 
 	if count != 3 {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[ThreeConcealedPungs].Point
 }
 
-func (pc *PointCalculator) FourConcealedPungs(hand *Hand) bool {
+func (pc *PointCalculator) FourConcealedPungs(hand *Hand) int {
 
 	// 實現判斷四暗刻的邏輯
 
@@ -313,13 +313,13 @@ func (pc *PointCalculator) FourConcealedPungs(hand *Hand) bool {
 	}
 
 	if count != 4 {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[FourConcealedPungs].Point
 }
 
-func (pc *PointCalculator) FiveConcealedPungs(hand *Hand) bool {
+func (pc *PointCalculator) FiveConcealedPungs(hand *Hand) int {
 
 	// 實現判斷五暗刻的邏輯
 
@@ -336,13 +336,13 @@ func (pc *PointCalculator) FiveConcealedPungs(hand *Hand) bool {
 	}
 
 	if count != 5 {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[FiveConcealedPungs].Point
 }
 
-func (pc *PointCalculator) SmallFourWinds(hand *Hand) bool {
+func (pc *PointCalculator) SmallFourWinds(hand *Hand) int {
 
 	// 實現判斷小四喜的邏輯
 
@@ -364,19 +364,19 @@ func (pc *PointCalculator) SmallFourWinds(hand *Hand) bool {
 			} else if c == 2 {
 				pairWinds++
 			} else {
-				return false
+				return 0
 			}
 		}
 	}
 
 	if tripletWinds != 3 || pairWinds != 1 {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[SmallFourWinds].Point
 }
 
-func (pc *PointCalculator) BigFourWinds(hand *Hand) bool {
+func (pc *PointCalculator) BigFourWinds(hand *Hand) int {
 
 	// 實現判斷大四喜的邏輯
 
@@ -393,7 +393,7 @@ func (pc *PointCalculator) BigFourWinds(hand *Hand) bool {
 	// 東
 	count, ok := results["I1"]
 	if !ok || count != 3 {
-		return false
+		return 0
 	}
 
 	tripletCount++
@@ -401,7 +401,7 @@ func (pc *PointCalculator) BigFourWinds(hand *Hand) bool {
 	// 南
 	count, ok = results["I2"]
 	if !ok || count != 3 {
-		return false
+		return 0
 	}
 
 	tripletCount++
@@ -409,7 +409,7 @@ func (pc *PointCalculator) BigFourWinds(hand *Hand) bool {
 	// 西
 	count, ok = results["I3"]
 	if !ok || count != 3 {
-		return false
+		return 0
 	}
 
 	tripletCount++
@@ -417,64 +417,64 @@ func (pc *PointCalculator) BigFourWinds(hand *Hand) bool {
 	// 北
 	count, ok = results["I4"]
 	if !ok || count != 3 {
-		return false
+		return 0
 	}
 
 	tripletCount++
 
 	// It should be 4 triplets
 	if tripletCount > 4 {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[BigFourWinds].Point
 }
 
-func (pc *PointCalculator) HeavenlyHand(g *Game, ps *PlayerState, hand *Hand) bool {
+func (pc *PointCalculator) HeavenlyHand(g *Game, ps *PlayerState, hand *Hand) int {
 
 	// Not banker
 	if !ps.IsBanker {
-		return false
+		return 0
 	}
 
 	// Not draw by self
 	if len(ps.Hand.Draw) == 0 {
-		return false
+		return 0
 	}
 
 	if len(ps.Hand.Kong.Open) > 0 || len(ps.Hand.Kong.Concealed) > 0 {
-		return false
+		return 0
 	}
 
 	// Not the first tile
 	if len(g.gs.Status.DiscardArea) != 0 {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[HeavenlyHand].Point
 }
 
 // TODO: TBD
-func (pc *PointCalculator) EarthlyHand(g *Game, ps *PlayerState, hand *Hand) bool {
+func (pc *PointCalculator) EarthlyHand(g *Game, ps *PlayerState, hand *Hand) int {
 
 	// Should not be banker
 	if ps.IsBanker {
-		return false
+		return 0
 	}
 
 	// No one do special action
 	for _, p := range g.gs.Players {
 		if len(p.Hand.Kong.Open) > 0 || len(p.Hand.Triplet) > 0 || len(p.Hand.Straight) > 0 {
-			return false
+			return 0
 		}
 	}
 
 	// Not draw by self
 	if len(ps.Hand.Draw) == 0 {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[EarthlyHand].Point
 }
 
 func (pc *PointCalculator) FlowerTiles(hand *Hand) {
@@ -485,17 +485,19 @@ func (pc *PointCalculator) AfterAKong(hand *Hand) {
 	// 實現判斷槓上開花的邏輯
 }
 
-func (pc *PointCalculator) LastTileDraw(g *Game, hand *Hand) bool {
+func (pc *PointCalculator) LastTileDraw(g *Game, hand *Hand) int {
+
+	// 海底撈月
 
 	if len(hand.Draw) == 0 {
-		return false
+		return 0
 	}
 
 	if len(g.gs.Meta.Tiles) != g.gs.Status.CurrentTileSetPosition {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[LastTileDraw].Point
 }
 
 func (pc *PointCalculator) RobbingTheKong(hand *Hand) {
@@ -510,13 +512,13 @@ func (pc *PointCalculator) SingleWait(hand *Hand) {
 	// 實現判斷獨聽的邏輯
 }
 
-func (pc *PointCalculator) SelfDrawn(hand *Hand) bool {
+func (pc *PointCalculator) SelfDrawn(hand *Hand) int {
 
 	if len(hand.Draw) == 0 {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[SelfDrawn].Point
 }
 
 func (pc *PointCalculator) MeldedKong(hand *Hand) {
@@ -527,13 +529,13 @@ func (pc *PointCalculator) ConcealedKong(hand *Hand) {
 	// 實現判斷暗槓的邏輯
 }
 
-func (pc *PointCalculator) ConcealedHand(hand *Hand) bool {
+func (pc *PointCalculator) ConcealedHand(hand *Hand) int {
 
 	// 實現判斷門前清的邏輯
 
 	if len(hand.Triplet) > 0 || len(hand.Straight) > 0 || len(hand.Kong.Concealed) > 0 || len(hand.Kong.Open) > 0 {
-		return false
+		return 0
 	}
 
-	return true
+	return pc.Rules[ConcealedHand].Point
 }
