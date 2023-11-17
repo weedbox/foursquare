@@ -175,8 +175,14 @@ func (g *Game) Act(action string) error {
 
 	switch action {
 	case "win":
-		//TODO: Needs a clearer definition
-		return g.triggerEvent(GameEvent_Win, ps.Hand.Draw[0])
+
+		payload := &GameEventPayload_Win{
+			DiscardingPlayer: ps.Idx,
+			WinningTile:      ps.Hand.Draw[0],
+			Winners:          []int{ps.Idx},
+		}
+
+		return g.triggerEvent(GameEvent_Win, payload)
 	case "kong":
 		err := ps.Hand.DoKong(ps.Hand.Draw[0], true)
 		if err != nil {
@@ -206,6 +212,8 @@ func (g *Game) React(playerIdx int, reaction string, selectedTiles []string) err
 		return ErrInvalidReaction
 	}
 
+	discardingPlayer := g.gs.Status.CurrentPlayer
+
 	g.gs.Status.CurrentPlayer = playerIdx
 
 	// Reset allowed actions
@@ -218,7 +226,14 @@ func (g *Game) React(playerIdx int, reaction string, selectedTiles []string) err
 	// do reaction
 	switch reaction {
 	case "win":
-		return g.triggerEvent(GameEvent_Win, discardedTile)
+
+		payload := &GameEventPayload_Win{
+			DiscardingPlayer: discardingPlayer,
+			WinningTile:      discardedTile,
+			Winners:          []int{playerIdx},
+		}
+
+		return g.triggerEvent(GameEvent_Win, payload)
 	case "kong":
 
 		err := ps.Hand.DoKong(discardedTile, false)
@@ -383,20 +398,25 @@ func (g *Game) WaitForReaction() error {
 	if hasReactors {
 
 		// All wins?
-		winCount := 0
+		var winners []int
 		for _, p := range players {
 			if p.IsAllowedAction("win") {
-				winCount++
+				winners = append(winners, p.Idx)
 			}
 		}
 
 		// Oops!
-		if winCount == len(players)-1 {
+		if len(winners) == len(players)-1 {
 
 			g.resetAllowedActions()
 
-			//TODO: Needs a clearer definition for payload
-			return g.triggerEvent(GameEvent_Win, nil)
+			payload := &GameEventPayload_Win{
+				DiscardingPlayer: ps.Idx,
+				WinningTile:      discardedTile,
+				Winners:          winners,
+			}
+
+			return g.triggerEvent(GameEvent_Win, payload)
 		}
 
 		return g.triggerEvent(GameEvent_WaitForReaction, nil)
