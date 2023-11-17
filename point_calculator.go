@@ -38,52 +38,56 @@ const (
 	ConcealedHand // 門前清
 )
 
-type PointRuleCondition struct {
+type PointRule struct {
 	Type  PointType `json:"type"`
 	Point int       `json:"point"`
 }
 
-type PointRule struct {
-	Conditions map[PointType]PointRuleCondition `json:"conditions"`
+type PointCalculator struct {
+	Rules map[PointType]PointRule `json:"rules"`
 }
 
-var StandardPointRule = &PointRule{
-	Conditions: map[PointType]PointRuleCondition{
-		MinimalPoints:      {Type: MinimalPoints, Point: 1},       // 平胡（自摸）
-		PungHand:           {Type: PungHand, Point: 2},            // 碰碰胡
-		HalfFlush:          {Type: HalfFlush, Point: 3},           // 混一色
-		FullFlush:          {Type: FullFlush, Point: 6},           // 清一色
-		LittleThreeDragons: {Type: LittleThreeDragons, Point: 4},  // 小三元
-		AllHonorsHand:      {Type: AllHonorsHand, Point: 5},       // 字一色
-		BigThreeDragons:    {Type: BigThreeDragons, Point: 8},     // 大三元
-		FourConcealedPungs: {Type: FourConcealedPungs, Point: 10}, // 四暗刻
-		SmallFourWinds:     {Type: SmallFourWinds, Point: 10},     // 小四喜
-		BigFourWinds:       {Type: BigFourWinds, Point: 13},       // 大四喜
+var StandardRules map[PointType]PointRule = map[PointType]PointRule{
+	MinimalPoints:      {Type: MinimalPoints, Point: 1},       // 平胡（自摸）
+	PungHand:           {Type: PungHand, Point: 2},            // 碰碰胡
+	HalfFlush:          {Type: HalfFlush, Point: 3},           // 混一色
+	FullFlush:          {Type: FullFlush, Point: 6},           // 清一色
+	LittleThreeDragons: {Type: LittleThreeDragons, Point: 4},  // 小三元
+	AllHonorsHand:      {Type: AllHonorsHand, Point: 5},       // 字一色
+	BigThreeDragons:    {Type: BigThreeDragons, Point: 8},     // 大三元
+	FourConcealedPungs: {Type: FourConcealedPungs, Point: 10}, // 四暗刻
+	SmallFourWinds:     {Type: SmallFourWinds, Point: 10},     // 小四喜
+	BigFourWinds:       {Type: BigFourWinds, Point: 13},       // 大四喜
 
-		HeavenlyHand: {Type: HeavenlyHand, Point: 16}, // 天胡
-		EarthlyHand:  {Type: EarthlyHand, Point: 16},  // 地胡
+	HeavenlyHand: {Type: HeavenlyHand, Point: 16}, // 天胡
+	EarthlyHand:  {Type: EarthlyHand, Point: 16},  // 地胡
 
-		FlowerTiles: {Type: FlowerTiles, Point: 1}, // 花牌
+	FlowerTiles: {Type: FlowerTiles, Point: 1}, // 花牌
 
-		AfterAKong:     {Type: AfterAKong, Point: 1},     // 槓上開花
-		LastTileDraw:   {Type: LastTileDraw, Point: 1},   // 海底撈月
-		RobbingTheKong: {Type: RobbingTheKong, Point: 1}, // 搶槓胡
-		KongOnDiscard:  {Type: KongOnDiscard, Point: 1},  // 杠上炮
-		SingleWait:     {Type: SingleWait, Point: 1},     // 獨聽
-		SelfDrawn:      {Type: SelfDrawn, Point: 1},      // 自摸加底
+	AfterAKong:     {Type: AfterAKong, Point: 1},     // 槓上開花
+	LastTileDraw:   {Type: LastTileDraw, Point: 1},   // 海底撈月
+	RobbingTheKong: {Type: RobbingTheKong, Point: 1}, // 搶槓胡
+	KongOnDiscard:  {Type: KongOnDiscard, Point: 1},  // 杠上炮
+	SingleWait:     {Type: SingleWait, Point: 1},     // 獨聽
+	SelfDrawn:      {Type: SelfDrawn, Point: 1},      // 自摸加底
 
-		MeldedKong:    {Type: MeldedKong, Point: 1},    // 明槓
-		ConcealedKong: {Type: ConcealedKong, Point: 1}, // 暗槓
+	MeldedKong:    {Type: MeldedKong, Point: 1},    // 明槓
+	ConcealedKong: {Type: ConcealedKong, Point: 1}, // 暗槓
 
-		ConcealedHand: {Type: ConcealedHand, Point: 1}, // 門前清
-	},
+	ConcealedHand: {Type: ConcealedHand, Point: 1}, // 門前清
 }
 
-func (pr *PointRule) MinimalPoints(hand *Hand) {
+func NewPointCalculator(rules map[PointType]PointRule) *PointCalculator {
+	return &PointCalculator{
+		Rules: rules,
+	}
+}
+
+func (pc *PointCalculator) MinimalPoints(hand *Hand) {
 	// 實現判斷平胡（自摸）的邏輯
 }
 
-func (pr *PointRule) PungHand(hand *Hand) bool {
+func (pc *PointCalculator) PungHand(hand *Hand) bool {
 
 	// 實現判斷碰碰胡的邏輯
 
@@ -115,7 +119,7 @@ func (pr *PointRule) PungHand(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) HalfFlush(hand *Hand) bool {
+func (pc *PointCalculator) HalfFlush(hand *Hand) bool {
 
 	// 實現判斷混一色的邏輯
 
@@ -150,7 +154,7 @@ func (pr *PointRule) HalfFlush(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) FullFlush(hand *Hand) bool {
+func (pc *PointCalculator) FullFlush(hand *Hand) bool {
 
 	// 實現判斷清一色的邏輯
 
@@ -177,7 +181,7 @@ func (pr *PointRule) FullFlush(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) LittleThreeDragons(hand *Hand) bool {
+func (pc *PointCalculator) LittleThreeDragons(hand *Hand) bool {
 
 	// 實現判斷小三元的邏輯
 
@@ -211,7 +215,7 @@ func (pr *PointRule) LittleThreeDragons(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) AllHonorsHand(hand *Hand) bool {
+func (pc *PointCalculator) AllHonorsHand(hand *Hand) bool {
 
 	// 實現判斷字一色的邏輯
 
@@ -229,7 +233,7 @@ func (pr *PointRule) AllHonorsHand(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) BigThreeDragons(hand *Hand) bool {
+func (pc *PointCalculator) BigThreeDragons(hand *Hand) bool {
 
 	// 實現判斷大三元的邏輯
 
@@ -262,7 +266,7 @@ func (pr *PointRule) BigThreeDragons(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) FourConcealedPungs(hand *Hand) bool {
+func (pc *PointCalculator) FourConcealedPungs(hand *Hand) bool {
 
 	// 實現判斷四暗刻的邏輯
 
@@ -287,7 +291,7 @@ func (pr *PointRule) FourConcealedPungs(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) SmallFourWinds(hand *Hand) bool {
+func (pc *PointCalculator) SmallFourWinds(hand *Hand) bool {
 
 	// 實現判斷小四喜的邏輯
 
@@ -321,7 +325,7 @@ func (pr *PointRule) SmallFourWinds(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) BigFourWinds(hand *Hand) bool {
+func (pc *PointCalculator) BigFourWinds(hand *Hand) bool {
 
 	// 實現判斷大四喜的邏輯
 
@@ -375,51 +379,51 @@ func (pr *PointRule) BigFourWinds(hand *Hand) bool {
 	return true
 }
 
-func (pr *PointRule) HeavenlyHand(hand *Hand) {
+func (pc *PointCalculator) HeavenlyHand(hand *Hand) {
 	// 實現判斷天胡的邏輯
 }
 
-func (pr *PointRule) EarthlyHand(hand *Hand) {
+func (pc *PointCalculator) EarthlyHand(hand *Hand) {
 	// 實現判斷地胡的邏輯
 }
 
-func (pr *PointRule) FlowerTiles(hand *Hand) {
+func (pc *PointCalculator) FlowerTiles(hand *Hand) {
 	// 實現判斷花牌的邏輯
 }
 
-func (pr *PointRule) AfterAKong(hand *Hand) {
+func (pc *PointCalculator) AfterAKong(hand *Hand) {
 	// 實現判斷槓上開花的邏輯
 }
 
-func (pr *PointRule) LastTileDraw(hand *Hand) {
+func (pc *PointCalculator) LastTileDraw(hand *Hand) {
 	// 實現判斷海底撈月的邏輯
 }
 
-func (pr *PointRule) RobbingTheKong(hand *Hand) {
+func (pc *PointCalculator) RobbingTheKong(hand *Hand) {
 	// 實現判斷搶槓胡的邏輯
 }
 
-func (pr *PointRule) KongOnDiscard(hand *Hand) {
+func (pc *PointCalculator) KongOnDiscard(hand *Hand) {
 	// 實現判斷杠上炮的邏輯
 }
 
-func (pr *PointRule) SingleWait(hand *Hand) {
+func (pc *PointCalculator) SingleWait(hand *Hand) {
 	// 實現判斷獨聽的邏輯
 }
 
-func (pr *PointRule) SelfDrawn(hand *Hand) {
+func (pc *PointCalculator) SelfDrawn(hand *Hand) {
 	// 實現判斷自摸加底的邏輯
 }
 
-func (pr *PointRule) MeldedKong(hand *Hand) {
+func (pc *PointCalculator) MeldedKong(hand *Hand) {
 	// 實現判斷明槓的邏輯
 }
 
-func (pr *PointRule) ConcealedKong(hand *Hand) {
+func (pc *PointCalculator) ConcealedKong(hand *Hand) {
 	// 實現判斷暗槓的邏輯
 }
 
-func (pr *PointRule) ConcealedHand(hand *Hand) bool {
+func (pc *PointCalculator) ConcealedHand(hand *Hand) bool {
 
 	// 實現判斷門前清的邏輯
 

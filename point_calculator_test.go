@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_PointRule_PungHand(t *testing.T) {
+func Test_PointCalculator_PungHand(t *testing.T) {
 
 	cases := []struct {
 		Answer bool
@@ -108,12 +108,14 @@ func Test_PointRule_PungHand(t *testing.T) {
 		},
 	}
 
+	pc := NewPointCalculator(StandardRules)
+
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, StandardPointRule.PungHand(c.Hand), i)
+		assert.Equal(t, c.Answer, pc.PungHand(c.Hand), i)
 	}
 }
 
-func Test_PointRule_FullFlush(t *testing.T) {
+func Test_PointCalculator_FullFlush(t *testing.T) {
 
 	cases := []struct {
 		Answer bool
@@ -167,12 +169,14 @@ func Test_PointRule_FullFlush(t *testing.T) {
 		},
 	}
 
+	pc := NewPointCalculator(StandardRules)
+
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, StandardPointRule.FullFlush(c.Hand), i)
+		assert.Equal(t, c.Answer, pc.FullFlush(c.Hand), i)
 	}
 }
 
-func Test_PointRule_HalfFlush(t *testing.T) {
+func Test_PointCalculator_HalfFlush(t *testing.T) {
 
 	cases := []struct {
 		Answer bool
@@ -228,12 +232,14 @@ func Test_PointRule_HalfFlush(t *testing.T) {
 		},
 	}
 
+	pc := NewPointCalculator(StandardRules)
+
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, StandardPointRule.HalfFlush(c.Hand), i)
+		assert.Equal(t, c.Answer, pc.HalfFlush(c.Hand), i)
 	}
 }
 
-func Test_PointRule_AllHonorsHand(t *testing.T) {
+func Test_PointCalculator_AllHonorsHand(t *testing.T) {
 
 	cases := []struct {
 		Answer bool
@@ -255,12 +261,14 @@ func Test_PointRule_AllHonorsHand(t *testing.T) {
 		},
 	}
 
+	pc := NewPointCalculator(StandardRules)
+
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, StandardPointRule.AllHonorsHand(c.Hand), i)
+		assert.Equal(t, c.Answer, pc.AllHonorsHand(c.Hand), i)
 	}
 }
 
-func Test_PointRule_BigThreeDragons(t *testing.T) {
+func Test_PointCalculator_BigThreeDragons(t *testing.T) {
 
 	cases := []struct {
 		Answer bool
@@ -296,12 +304,14 @@ func Test_PointRule_BigThreeDragons(t *testing.T) {
 		},
 	}
 
+	pc := NewPointCalculator(StandardRules)
+
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, StandardPointRule.BigThreeDragons(c.Hand), i)
+		assert.Equal(t, c.Answer, pc.BigThreeDragons(c.Hand), i)
 	}
 }
 
-func Test_PointRule_BigFourWinds(t *testing.T) {
+func Test_PointCalculator_BigFourWinds(t *testing.T) {
 
 	cases := []struct {
 		Answer bool
@@ -337,12 +347,14 @@ func Test_PointRule_BigFourWinds(t *testing.T) {
 		},
 	}
 
+	pc := NewPointCalculator(StandardRules)
+
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, StandardPointRule.BigFourWinds(c.Hand), i)
+		assert.Equal(t, c.Answer, pc.BigFourWinds(c.Hand), i)
 	}
 }
 
-func Test_PointRule_SmallFourWinds(t *testing.T) {
+func Test_PointCalculator_SmallFourWinds(t *testing.T) {
 
 	cases := []struct {
 		Answer bool
@@ -378,12 +390,14 @@ func Test_PointRule_SmallFourWinds(t *testing.T) {
 		},
 	}
 
+	pc := NewPointCalculator(StandardRules)
+
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, StandardPointRule.SmallFourWinds(c.Hand), i)
+		assert.Equal(t, c.Answer, pc.SmallFourWinds(c.Hand), i)
 	}
 }
 
-func Test_PointRule_FourConcealedPungs(t *testing.T) {
+func Test_PointCalculator_FourConcealedPungs(t *testing.T) {
 
 	cases := []struct {
 		Answer bool
@@ -434,12 +448,14 @@ func Test_PointRule_FourConcealedPungs(t *testing.T) {
 		},
 	}
 
+	pc := NewPointCalculator(StandardRules)
+
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, StandardPointRule.FourConcealedPungs(c.Hand), i)
+		assert.Equal(t, c.Answer, pc.FourConcealedPungs(c.Hand), i)
 	}
 }
 
-func Test_PointRule_LittleThreeDragons(t *testing.T) {
+func Test_PointCalculator_LittleThreeDragons(t *testing.T) {
 
 	cases := []struct {
 		Answer bool
@@ -476,7 +492,9 @@ func Test_PointRule_LittleThreeDragons(t *testing.T) {
 		},
 	}
 
+	pc := NewPointCalculator(StandardRules)
+
 	for i, c := range cases {
-		assert.Equal(t, c.Answer, StandardPointRule.LittleThreeDragons(c.Hand), i)
+		assert.Equal(t, c.Answer, pc.LittleThreeDragons(c.Hand), i)
 	}
 }
