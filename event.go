@@ -200,10 +200,33 @@ func (g *Game) onNoMoreTiles(payload interface{}) error {
 }
 
 func (g *Game) onGameDrawn(payload interface{}) error {
+
+	g.gs.Result = &Result{
+		IsDrawnGame: true,
+	}
+
 	return g.DoSettlement()
 }
 
 func (g *Game) onWin(payload interface{}) error {
+
+	if payload == nil {
+		return ErrInvalidEventPayload
+	}
+
+	p := payload.(*GameEventPayload_Win)
+
+	g.gs.Result = &Result{
+		IsDrawnGame:      false,
+		DiscardingPlayer: p.DiscardingPlayer,
+		WinningTile:      p.WinningTile,
+		Winners:          make(map[int]WinnerResult),
+	}
+
+	for _, winnerIdx := range p.Winners {
+		g.gs.Result.Winners[winnerIdx] = WinnerResult{}
+	}
+
 	return g.DoSettlement()
 }
 

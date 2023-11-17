@@ -7,6 +7,7 @@ type GameState struct {
 	Meta      Meta          `json:"meta"`
 	Players   []PlayerState `json:"players"`
 	Status    Status        `json:"status"`
+	Result    *Result       `json:"result,omitempty"`
 }
 
 type Meta struct {
@@ -32,6 +33,18 @@ type Status struct {
 	CurrentSupplementPosition int      `json:"cur_spos"`
 	CurrentPlayer             int      `json:"cur_player"`
 	DiscardArea               []string `json:"discard_area"`
+}
+
+type Result struct {
+	IsDrawnGame      bool                 `json:"is_drawn_game"`
+	DiscardingPlayer int                  `json:"discarding_player,omitempty"`
+	WinningTile      string               `json:"winning_tile,omitempty"`
+	Winners          map[int]WinnerResult `json:"winners,omitempty"`
+}
+
+type WinnerResult struct {
+	Points     int               `json:"points"`
+	Conditions map[PointType]int `json:"conditions"`
 }
 
 func NewGameState() *GameState {
