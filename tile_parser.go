@@ -146,7 +146,7 @@ func RemoveTiles(tiles []string, targets []string) ([]string, int) {
 
 		for i, t := range newTiles {
 			if t == target {
-				newTiles = append(newTiles[0:i], newTiles[i+1:len(newTiles)]...)
+				newTiles = append(newTiles[0:i], newTiles[i+1:]...)
 				removed++
 				break
 			}
@@ -294,7 +294,7 @@ func CheckWinningTiles(tiles []string, hasEyes bool, rules *ResolverRules) bool 
 		if rules.Triplet {
 			if CountSpecificTile(leftTiles, leftTiles[0]) >= 3 {
 				// Attempt to remove triplet
-				leftTiles = leftTiles[3:len(leftTiles)]
+				leftTiles = leftTiles[3:]
 				continue
 			} else if !rules.Straight {
 				// Triplet only
@@ -365,7 +365,7 @@ func ParseTileSegmentations(tiles []string, hasEyes bool, rules *ResolverRules) 
 				segments = append(segments, selected)
 
 				// Attempt to remove triplet
-				leftTiles = leftTiles[3:len(leftTiles)]
+				leftTiles = leftTiles[3:]
 
 				continue
 			} else if !rules.Straight {
@@ -394,35 +394,6 @@ func ParseTileSegmentations(tiles []string, hasEyes bool, rules *ResolverRules) 
 
 	return segments, true
 
-}
-func ResolveTileSegmentations(tiles []string) [][]string {
-
-	segments := make([][]string, 0)
-
-	groups := MakeSuitGroups(tiles)
-	for suit, g := range groups {
-
-		// Determine rules for suit
-		var rules *ResolverRules
-
-		switch suit {
-		case TileSuitWan, TileSuitTong, TileSuitBamboo:
-			rules = SuitedTileRule
-		case TileSuitWind, TileSuitDragon:
-			rules = HonorTileRule
-		}
-
-		hasEyes := false
-		if len(g)%3 != 0 {
-			hasEyes = true
-		}
-
-		ss, _ := ParseTileSegmentations(g, hasEyes, rules)
-
-		segments = append(segments, ss...)
-	}
-
-	return segments
 }
 
 func FigureReadyHandConditions(tileSetDef *TileSetDef, suit TileSuit, tiles []string, rules *ResolverRules) (bool, []string) {

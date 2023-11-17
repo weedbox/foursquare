@@ -203,3 +203,26 @@ func Test_Resolver_Resolve_ReadyHand(t *testing.T) {
 	}
 
 }
+
+func Test_Resolver_ResolveTileSegmentations(t *testing.T) {
+
+	cases := []struct {
+		Answer [][]string
+		Tiles  []string
+	}{
+		{
+			// Two suits
+			[][]string{
+				{"B1", "B2", "B3"},
+				{"W4", "W5", "W6"},
+				{"W8", "W8"},
+			},
+			[]string{"B1", "B2", "B3", "W4", "W5", "W6", "W8", "W8"},
+		},
+	}
+
+	for _, c := range cases {
+		segments := ResolveTileSegmentations(c.Tiles)
+		assert.ElementsMatch(t, c.Answer, segments, c.Tiles)
+	}
+}

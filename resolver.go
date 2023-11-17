@@ -141,6 +141,36 @@ func Resolve(tileSetDef *TileSetDef, tiles []string) *ResolvedState {
 	return state
 }
 
+func ResolveTileSegmentations(tiles []string) [][]string {
+
+	segments := make([][]string, 0)
+
+	groups := MakeSuitGroups(tiles)
+	for suit, g := range groups {
+
+		// Determine rules for suit
+		var rules *ResolverRules
+
+		switch suit {
+		case TileSuitWan, TileSuitTong, TileSuitBamboo:
+			rules = SuitedTileRule
+		case TileSuitWind, TileSuitDragon:
+			rules = HonorTileRule
+		}
+
+		hasEyes := false
+		if len(g)%3 != 0 {
+			hasEyes = true
+		}
+
+		ss, _ := ParseTileSegmentations(g, hasEyes, rules)
+
+		segments = append(segments, ss...)
+	}
+
+	return segments
+}
+
 func FigureDiscardCandidatesForReadyHand(tileSetDef *TileSetDef, tiles []string) []*DiscardCandidate {
 
 	candidates := make([]*DiscardCandidate, 0)
