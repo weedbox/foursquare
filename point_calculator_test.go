@@ -378,6 +378,100 @@ func Test_PointCalculator_BigFourWinds(t *testing.T) {
 	}
 }
 
+func Test_PointCalculator_MeldedHand(t *testing.T) {
+
+	cases := []struct {
+		Answer bool
+		Hand   *Hand
+	}{
+		{
+			false,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"I1", "I2", "I3", "I4", "B1"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"T1", "T1"},
+				Draw:  []string{"T1"},
+			},
+		},
+		{
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"I1", "I2", "I3", "I4", "B1"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"T1", "T1"},
+				Draw:  []string{},
+			},
+		},
+	}
+
+	pc := NewPointCalculator(StandardRules)
+
+	for i, c := range cases {
+		if c.Answer {
+			assert.NotZero(t, pc.MeldedHand(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.MeldedHand(c.Hand), i)
+		}
+	}
+}
+
+func Test_PointCalculator_HalfMeldedHand(t *testing.T) {
+
+	cases := []struct {
+		Answer bool
+		Hand   *Hand
+	}{
+		{
+			true,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"I1", "I2", "I3", "I4", "B1"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"T1", "T1"},
+				Draw:  []string{"T1"},
+			},
+		},
+		{
+			false,
+			&Hand{
+				Flowers:  []string{"F1", "F2"},
+				Triplet:  []string{"I1", "I2", "I3", "I4", "B1"},
+				Straight: [][]string{},
+				Kong: Kong{
+					Open:      []string{},
+					Concealed: []string{},
+				},
+				Tiles: []string{"T1", "T1"},
+				Draw:  []string{},
+			},
+		},
+	}
+
+	pc := NewPointCalculator(StandardRules)
+
+	for i, c := range cases {
+		if c.Answer {
+			assert.NotZero(t, pc.HalfMeldedHand(c.Hand), i)
+		} else {
+			assert.Zero(t, pc.HalfMeldedHand(c.Hand), i)
+		}
+	}
+}
+
 func Test_PointCalculator_SmallFourWinds(t *testing.T) {
 
 	cases := []struct {

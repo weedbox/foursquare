@@ -16,6 +16,8 @@ const (
 	FiveConcealedPungs                   // 五暗刻
 	SmallFourWinds                       // 小四喜
 	BigFourWinds                         // 大四喜
+	MeldedHand                           // 全求人
+	HalfMeldedHand                       // 半求人
 
 	// 特殊牌型
 	HeavenlyHand // 天胡
@@ -25,12 +27,13 @@ const (
 	FlowerTiles // 花牌
 
 	// 其他條件
-	AfterAKong     // 槓上開花
-	LastTileDraw   // 海底撈月
-	RobbingTheKong // 搶槓胡
-	KongOnDiscard  // 杠上炮
-	SingleWait     // 獨聽
-	SelfDrawn      // 自摸加底
+	AfterAKong       // 槓上開花
+	LastTileDraw     // 海底撈月
+	RobbingTheKong   // 搶槓胡
+	KongOnDiscard    // 杠上炮
+	SingleWait       // 獨聽
+	SelfDrawn        // 自摸加底
+	DeclareReadyHand // 宣告聽牌
 
 	// 番種
 	MeldedKong    // 明槓
@@ -62,18 +65,21 @@ var StandardRules map[PointType]PointRule = map[PointType]PointRule{
 	FiveConcealedPungs:  {Type: FiveConcealedPungs, Point: 8},  // 五暗刻
 	SmallFourWinds:      {Type: SmallFourWinds, Point: 8},      // 小四喜
 	BigFourWinds:        {Type: BigFourWinds, Point: 16},       // 大四喜
+	MeldedHand:          {Type: MeldedHand, Point: 2},          // 全求人
+	HalfMeldedHand:      {Type: MeldedHand, Point: 1},          // 半求人
 
 	HeavenlyHand: {Type: HeavenlyHand, Point: 16}, // 天胡
 	EarthlyHand:  {Type: EarthlyHand, Point: 16},  // 地胡
 
 	FlowerTiles: {Type: FlowerTiles, Point: 1}, // 花牌
 
-	AfterAKong:     {Type: AfterAKong, Point: 1},     // 槓上開花
-	LastTileDraw:   {Type: LastTileDraw, Point: 1},   // 海底撈月
-	RobbingTheKong: {Type: RobbingTheKong, Point: 1}, // 搶槓胡
-	KongOnDiscard:  {Type: KongOnDiscard, Point: 1},  // 杠上炮
-	SingleWait:     {Type: SingleWait, Point: 1},     // 獨聽
-	SelfDrawn:      {Type: SelfDrawn, Point: 1},      // 自摸加底
+	AfterAKong:       {Type: AfterAKong, Point: 1},       // 槓上開花
+	LastTileDraw:     {Type: LastTileDraw, Point: 1},     // 海底撈月
+	RobbingTheKong:   {Type: RobbingTheKong, Point: 1},   // 搶槓胡
+	KongOnDiscard:    {Type: KongOnDiscard, Point: 1},    // 杠上炮
+	SingleWait:       {Type: SingleWait, Point: 1},       // 獨聽
+	SelfDrawn:        {Type: SelfDrawn, Point: 1},        // 自摸加底
+	DeclareReadyHand: {Type: DeclareReadyHand, Point: 1}, // 宣告聽牌
 
 	MeldedKong:    {Type: MeldedKong, Point: 1},    // 明槓
 	ConcealedKong: {Type: ConcealedKong, Point: 1}, // 暗槓
@@ -93,6 +99,16 @@ func (pc *PointCalculator) Calculate(g *Game, ps *PlayerState, hand *Hand) {
 
 func (pc *PointCalculator) MinimalPoints(hand *Hand) {
 	// 實現判斷平胡（自摸）的邏輯
+}
+
+func (pc *PointCalculator) DeclareReadyHand(ps *PlayerState) int {
+
+	// 宣告聽牌
+	if !ps.IsReadyHand {
+		return 0
+	}
+
+	return pc.Rules[DeclareReadyHand].Point
 }
 
 func (pc *PointCalculator) PungHand(hand *Hand) int {
@@ -430,6 +446,28 @@ func (pc *PointCalculator) BigFourWinds(hand *Hand) int {
 	return pc.Rules[BigFourWinds].Point
 }
 
+func (pc *PointCalculator) MeldedHand(hand *Hand) int {
+
+	// 全求人
+
+	if len(hand.Tiles) != 2 || len(hand.Draw) != 0 {
+		return 0
+	}
+
+	return pc.Rules[MeldedHand].Point
+}
+
+func (pc *PointCalculator) HalfMeldedHand(hand *Hand) int {
+
+	// 半求人
+
+	if len(hand.Tiles) != 2 || len(hand.Draw) != 1 {
+		return 0
+	}
+
+	return pc.Rules[HalfMeldedHand].Point
+}
+
 func (pc *PointCalculator) HeavenlyHand(g *Game, ps *PlayerState, hand *Hand) int {
 
 	// Not banker
@@ -477,8 +515,9 @@ func (pc *PointCalculator) EarthlyHand(g *Game, ps *PlayerState, hand *Hand) int
 	return pc.Rules[EarthlyHand].Point
 }
 
-func (pc *PointCalculator) FlowerTiles(hand *Hand) {
-	// 實現判斷花牌的邏輯
+func (pc *PointCalculator) FlowerTiles(hand *Hand) int {
+	// 見花見台
+	return len(hand.Flowers)
 }
 
 func (pc *PointCalculator) AfterAKong(hand *Hand) {
@@ -514,6 +553,8 @@ func (pc *PointCalculator) SingleWait(hand *Hand) {
 
 func (pc *PointCalculator) SelfDrawn(hand *Hand) int {
 
+	// 自摸
+
 	if len(hand.Draw) == 0 {
 		return 0
 	}
@@ -521,12 +562,14 @@ func (pc *PointCalculator) SelfDrawn(hand *Hand) int {
 	return pc.Rules[SelfDrawn].Point
 }
 
-func (pc *PointCalculator) MeldedKong(hand *Hand) {
-	// 實現判斷明槓的邏輯
+func (pc *PointCalculator) MeldedKong(hand *Hand) int {
+	// 明槓
+	return len(hand.Kong.Open)
 }
 
-func (pc *PointCalculator) ConcealedKong(hand *Hand) {
-	// 實現判斷暗槓的邏輯
+func (pc *PointCalculator) ConcealedKong(hand *Hand) int {
+	// 暗槓
+	return len(hand.Kong.Concealed)
 }
 
 func (pc *PointCalculator) ConcealedHand(hand *Hand) int {
