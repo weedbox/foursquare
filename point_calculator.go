@@ -4,16 +4,18 @@ type PointType int32
 
 const (
 	// 基本牌型台數
-	MinimalPoints      PointType = iota // 平胡（自摸）
-	PungHand                            // 碰碰胡
-	HalfFlush                           // 混一色
-	FullFlush                           // 清一色
-	LittleThreeDragons                  // 小三元
-	AllHonorsHand                       // 字一色
-	BigThreeDragons                     // 大三元
-	FourConcealedPungs                  // 四暗刻
-	SmallFourWinds                      // 小四喜
-	BigFourWinds                        // 大四喜
+	MinimalPoints       PointType = iota // 平胡（自摸）
+	PungHand                             // 碰碰胡
+	HalfFlush                            // 混一色
+	FullFlush                            // 清一色
+	LittleThreeDragons                   // 小三元
+	AllHonorsHand                        // 字一色
+	BigThreeDragons                      // 大三元
+	ThreeConcealedPungs                  // 三暗刻
+	FourConcealedPungs                   // 四暗刻
+	FiveConcealedPungs                   // 五暗刻
+	SmallFourWinds                       // 小四喜
+	BigFourWinds                         // 大四喜
 
 	// 特殊牌型
 	HeavenlyHand // 天胡
@@ -48,16 +50,18 @@ type PointCalculator struct {
 }
 
 var StandardRules map[PointType]PointRule = map[PointType]PointRule{
-	MinimalPoints:      {Type: MinimalPoints, Point: 1},       // 平胡（自摸）
-	PungHand:           {Type: PungHand, Point: 2},            // 碰碰胡
-	HalfFlush:          {Type: HalfFlush, Point: 3},           // 混一色
-	FullFlush:          {Type: FullFlush, Point: 6},           // 清一色
-	LittleThreeDragons: {Type: LittleThreeDragons, Point: 4},  // 小三元
-	AllHonorsHand:      {Type: AllHonorsHand, Point: 5},       // 字一色
-	BigThreeDragons:    {Type: BigThreeDragons, Point: 8},     // 大三元
-	FourConcealedPungs: {Type: FourConcealedPungs, Point: 10}, // 四暗刻
-	SmallFourWinds:     {Type: SmallFourWinds, Point: 10},     // 小四喜
-	BigFourWinds:       {Type: BigFourWinds, Point: 13},       // 大四喜
+	MinimalPoints:       {Type: MinimalPoints, Point: 1},       // 平胡（自摸）
+	PungHand:            {Type: PungHand, Point: 2},            // 碰碰胡
+	HalfFlush:           {Type: HalfFlush, Point: 3},           // 混一色
+	FullFlush:           {Type: FullFlush, Point: 6},           // 清一色
+	LittleThreeDragons:  {Type: LittleThreeDragons, Point: 4},  // 小三元
+	AllHonorsHand:       {Type: AllHonorsHand, Point: 5},       // 字一色
+	BigThreeDragons:     {Type: BigThreeDragons, Point: 8},     // 大三元
+	ThreeConcealedPungs: {Type: ThreeConcealedPungs, Point: 2}, // 三暗刻
+	FourConcealedPungs:  {Type: FourConcealedPungs, Point: 5},  // 四暗刻
+	FiveConcealedPungs:  {Type: FiveConcealedPungs, Point: 8},  // 五暗刻
+	SmallFourWinds:      {Type: SmallFourWinds, Point: 10},     // 小四喜
+	BigFourWinds:        {Type: BigFourWinds, Point: 13},       // 大四喜
 
 	HeavenlyHand: {Type: HeavenlyHand, Point: 16}, // 天胡
 	EarthlyHand:  {Type: EarthlyHand, Point: 16},  // 地胡
@@ -270,18 +274,38 @@ func (pc *PointCalculator) BigThreeDragons(hand *Hand) bool {
 	return true
 }
 
+func (pc *PointCalculator) ThreeConcealedPungs(hand *Hand) bool {
+
+	// 實現判斷三暗刻的邏輯
+
+	count := 0
+	count += len(hand.Triplet)
+	count += len(hand.Kong.Concealed)
+
+	segments := ResolveTileSegmentations(hand.Tiles)
+	for _, s := range segments {
+		if IsTriplet(s) {
+			count++
+		}
+	}
+
+	if count != 3 {
+		return false
+	}
+
+	return true
+}
+
 func (pc *PointCalculator) FourConcealedPungs(hand *Hand) bool {
 
 	// 實現判斷四暗刻的邏輯
 
+	count := 0
+	count += len(hand.Triplet)
+	count += len(hand.Kong.Concealed)
+
 	segments := ResolveTileSegmentations(hand.Tiles)
 
-	// 4 pungs + eyes
-	if len(segments) < 5 {
-		return false
-	}
-
-	count := 0
 	for _, s := range segments {
 		if IsTriplet(s) {
 			count++
@@ -289,6 +313,29 @@ func (pc *PointCalculator) FourConcealedPungs(hand *Hand) bool {
 	}
 
 	if count != 4 {
+		return false
+	}
+
+	return true
+}
+
+func (pc *PointCalculator) FiveConcealedPungs(hand *Hand) bool {
+
+	// 實現判斷五暗刻的邏輯
+
+	count := 0
+	count += len(hand.Triplet)
+	count += len(hand.Kong.Concealed)
+
+	segments := ResolveTileSegmentations(hand.Tiles)
+
+	for _, s := range segments {
+		if IsTriplet(s) {
+			count++
+		}
+	}
+
+	if count != 5 {
 		return false
 	}
 
