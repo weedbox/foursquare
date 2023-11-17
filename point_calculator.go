@@ -83,6 +83,10 @@ func NewPointCalculator(rules map[PointType]PointRule) *PointCalculator {
 	}
 }
 
+func (pc *PointCalculator) Calculate(g *Game, ps *PlayerState, hand *Hand) {
+	//TODO
+}
+
 func (pc *PointCalculator) MinimalPoints(hand *Hand) {
 	// 實現判斷平胡（自摸）的邏輯
 }
@@ -379,12 +383,51 @@ func (pc *PointCalculator) BigFourWinds(hand *Hand) bool {
 	return true
 }
 
-func (pc *PointCalculator) HeavenlyHand(hand *Hand) {
-	// 實現判斷天胡的邏輯
+func (pc *PointCalculator) HeavenlyHand(g *Game, ps *PlayerState, hand *Hand) bool {
+
+	// Not banker
+	if !ps.IsBanker {
+		return false
+	}
+
+	// Not draw by self
+	if len(ps.Hand.Draw) == 0 {
+		return false
+	}
+
+	if len(ps.Hand.Kong.Open) > 0 || len(ps.Hand.Kong.Concealed) > 0 {
+		return false
+	}
+
+	// Not the first tile
+	if len(g.gs.Status.DiscardArea) != 0 {
+		return false
+	}
+
+	return true
 }
 
-func (pc *PointCalculator) EarthlyHand(hand *Hand) {
-	// 實現判斷地胡的邏輯
+// TODO: TBD
+func (pc *PointCalculator) EarthlyHand(g *Game, ps *PlayerState, hand *Hand) bool {
+
+	// Should not be banker
+	if ps.IsBanker {
+		return false
+	}
+
+	// No one do special action
+	for _, p := range g.gs.Players {
+		if len(p.Hand.Kong.Open) > 0 || len(p.Hand.Triplet) > 0 || len(p.Hand.Straight) > 0 {
+			return false
+		}
+	}
+
+	// Not draw by self
+	if len(ps.Hand.Draw) == 0 {
+		return false
+	}
+
+	return true
 }
 
 func (pc *PointCalculator) FlowerTiles(hand *Hand) {
@@ -395,8 +438,17 @@ func (pc *PointCalculator) AfterAKong(hand *Hand) {
 	// 實現判斷槓上開花的邏輯
 }
 
-func (pc *PointCalculator) LastTileDraw(hand *Hand) {
-	// 實現判斷海底撈月的邏輯
+func (pc *PointCalculator) LastTileDraw(g *Game, hand *Hand) bool {
+
+	if len(hand.Draw) == 0 {
+		return false
+	}
+
+	if len(g.gs.Meta.Tiles) != g.gs.Status.CurrentTileSetPosition {
+		return false
+	}
+
+	return true
 }
 
 func (pc *PointCalculator) RobbingTheKong(hand *Hand) {
@@ -411,8 +463,13 @@ func (pc *PointCalculator) SingleWait(hand *Hand) {
 	// 實現判斷獨聽的邏輯
 }
 
-func (pc *PointCalculator) SelfDrawn(hand *Hand) {
-	// 實現判斷自摸加底的邏輯
+func (pc *PointCalculator) SelfDrawn(hand *Hand) bool {
+
+	if len(hand.Draw) == 0 {
+		return false
+	}
+
+	return true
 }
 
 func (pc *PointCalculator) MeldedKong(hand *Hand) {
